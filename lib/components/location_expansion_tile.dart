@@ -1,0 +1,49 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:reading_where/enums/asset_type.dart';
+
+class LocationExpansionTile extends StatelessWidget {
+  final String title;
+  final String assetPath;
+  final List<Widget> children;
+  final AssetType assetType;
+
+  const LocationExpansionTile({
+    super.key,
+    required this.title,
+    required this.assetPath,
+    required this.children,
+    this.assetType = AssetType.svg,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: ExpansionTile(
+        leading: _getLeading(),
+        title: Text(title),
+        children: children,
+      ),
+    );
+  }
+
+  Widget _getLeading() {
+    return assetType == AssetType.svg ? _getSvgAsset() : _getImageAsset();
+  }
+
+  Widget _getSvgAsset() {
+    print("Trying to get svg from path $assetPath");
+    return SvgPicture.asset(
+        assetPath,
+        width: 44
+    );
+  }
+
+  Widget _getImageAsset() {
+    return Image.asset(
+      assetPath,
+      width: 44,
+    );
+  }
+}

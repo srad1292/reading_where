@@ -1,0 +1,4 @@
+enum AssetType {
+  png,
+  svg
+}
