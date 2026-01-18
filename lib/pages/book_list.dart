@@ -4,6 +4,8 @@ import 'package:reading_where/components/book_tile.dart';
 import 'package:reading_where/pages/book_information.dart';
 import 'package:reading_where/pages/book_list_filter_form.dart';
 
+import 'book_lookup.dart';
+
 class BookList extends StatefulWidget {
   final BookListType bookListType;
 
@@ -32,7 +34,7 @@ class _BookListState extends State<BookList> {
                     break;
                   case 'add':
                     Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => BookInformation()),
+                      MaterialPageRoute(builder: (_) => BookLookup()),
                     );
                     break;
                 }

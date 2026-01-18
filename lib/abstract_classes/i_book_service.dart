@@ -1,0 +1,6 @@
+import '../models/book_search.dart';
+import '../models/paginated_book.dart';
+
+abstract class IBookService {
+  Future<PaginatedBook> searchForBooks(BookSearch bookSearch);
+}
