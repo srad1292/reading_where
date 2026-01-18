@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class BookTile extends StatefulWidget {
   final String title;
+  final bool isRead;
 
-  const BookTile({super.key, required this.title});
+  const BookTile({super.key, required this.title, required this.isRead});
 
   @override
   State<BookTile> createState() => _BookTileState();
@@ -15,13 +16,9 @@ class _BookTileState extends State<BookTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: Checkbox(
-          value: _isChecked,
-          onChanged: (bool? value) {
-            setState(() {
-              _isChecked = value ?? false;
-            });
-          },
+        leading: widget.isRead == false ? null : const Icon(
+          Icons.verified,
+          color: Colors.blue,
         ),
         title: Text(widget.title),
         trailing: const Icon(

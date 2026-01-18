@@ -1,8 +1,11 @@
-class Country {
-  int id;
-  String name;
-  String region;
-  String code;
+import '../enums/asset_type.dart';
 
-  Country(this.id, this.name, this.region, this.code);
+class Country {
+  final String name;
+  final String region;
+  final String code;
+  bool canBeReadFrom;
+  AssetType flagType;
+
+  Country({required this.code, required this.name, required this.region, this.canBeReadFrom=true, this.flagType=AssetType.png});
 }

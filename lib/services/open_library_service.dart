@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:reading_where/abstract_classes/i_book_service.dart';
 import 'package:reading_where/models/book_search.dart';
@@ -48,6 +49,18 @@ class OpenLibraryService implements IBookService {
     final json = jsonDecode(response.body);
     OpenPagination openPagination = OpenPagination.fromJson(json);
     return openPagination.toPaginatedBook();
+  }
+
+  @override
+  Future<Uint8List> fetchCoverBytes(int coverId) async {
+    final url = "https://covers.openlibrary.org/b/id/$coverId-M.jpg";
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    }
+    else {
+      throw Exception("Failed to load image");
+    }
   }
 
 

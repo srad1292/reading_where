@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:reading_where/abstract_classes/i_book_service.dart';
 import 'package:reading_where/service_locator.dart';
 
@@ -17,4 +19,11 @@ class BookService implements IBookService {
   Future<PaginatedBook> searchForBooks(BookSearch bookSearch) {
     return implementedService.searchForBooks(bookSearch);
   }
+
+  @override
+  Future<Uint8List> fetchCoverBytes(int coverId) {
+    return implementedService.fetchCoverBytes(coverId);
+  }
+
+
 }

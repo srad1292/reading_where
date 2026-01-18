@@ -36,7 +36,7 @@ class MyHomePage extends StatelessWidget {
               ),
               LocationExpansionTile(
                   title: "United States",
-                  assetPath: 'assets/images/country_flags/us.svg',
+                  assetPath: 'assets/images/country_flags_svg/us.svg',
                   children: [
                     NavigationTile(text: "State List", onTap: () => BookListNavigation(context, BookListType.states),),
                     NavigationTile(text: "Analytics", onTap: () => AnalyticsNavigation(),),

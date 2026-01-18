@@ -27,5 +27,6 @@ flutter:
   uses-material-design: true
   assets:
    - assets/images/
-   - assets/images/country_flags/
+   - assets/images/country_flags_svg/
+   - assets/images/country_flags_png/
 

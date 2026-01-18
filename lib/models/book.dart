@@ -6,6 +6,10 @@ class Book {
   final int? coverId;
   final int? publishYear;
 
+  String? countryCode;
+  DateTime? readDate;
+  int? rating;
+
   Book({
     required this.title,
     required this.authorKey,
@@ -13,6 +17,9 @@ class Book {
     this.coverEditionKey,
     this.coverId,
     this.publishYear,
+    this.countryCode,
+    this.rating,
+    this.readDate,
   });
 
   @override
