@@ -7,12 +7,14 @@ class LocationExpansionTile extends StatelessWidget {
   final String assetPath;
   final List<Widget> children;
   final AssetType assetType;
+  final bool readFrom;
 
   const LocationExpansionTile({
     super.key,
     required this.title,
     required this.assetPath,
     required this.children,
+    this.readFrom = false,
     this.assetType = AssetType.svg,
   });
 
@@ -22,7 +24,16 @@ class LocationExpansionTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: ExpansionTile(
         leading: _getLeading(),
-        title: Text(title),
+        title: Row(
+          children: [
+            Text(title),
+            if (readFrom)
+              ...[
+                const SizedBox(width: 6),
+                const Icon(Icons.check_circle, color: Colors.green, size: 18),
+              ],
+          ],
+        ),
         children: children,
       ),
     );

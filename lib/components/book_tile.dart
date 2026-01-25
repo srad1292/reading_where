@@ -12,14 +12,12 @@ class BookTile extends StatefulWidget {
 }
 
 class _BookTileState extends State<BookTile> {
-  bool _isChecked = false;
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
         leading: widget.isRead == false ? null : const Icon(
           Icons.verified,
-          color: Colors.blue,
+          color: Colors.green,
         ),
         title: Text(widget.title),
         trailing: const Icon(

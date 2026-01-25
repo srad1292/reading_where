@@ -30,6 +30,7 @@ class _BookListState extends State<BookList> {
   late Future<List<Country>> _countryFuture;
   late Future<List<Book>> _savedBooksFuture;
 
+
   @override
   void initState() {
     super.initState();
@@ -39,71 +40,87 @@ class _BookListState extends State<BookList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(_getAppBarTitle()),
-        centerTitle: true,
-          actions: [
-            PopupMenuButton(
-              onSelected: (value) async {
-                switch (value) {
-                  case 'filter':
-                    Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => BookListFilterForm()),
-                    );
-                    break;
-                  case 'add':
-                    Book? savedBook = await Navigator.push(context,
-                      MaterialPageRoute( builder: (_) => BookLookup() ),
-                    );
+    return FutureBuilder(
+      future: Future.wait([
+        _countryFuture,
+        _savedBooksFuture
+      ]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-                    if(savedBook != null) {
-                      setState(() {
-                        _savedBooksFuture = _bookService.getSavedBooks();
-                      });
+        final countries = snapshot.data![0] as List<Country>;
+        final books = snapshot.data![1] as List<Book>;
+        final booksByCountry = _groupBooksByCountry(books);
+        int readLocations = 0;
+        if(widget.bookListType == BookListType.country) {
+
+          readLocations = countries.where((country) {
+            final books = booksByCountry[country.code] ?? [];
+            return books.any((b) => b.readDate != null);
+          }).length;
+        }
+
+
+        return Scaffold(
+          appBar: AppBar(
+              backgroundColor: Theme
+                  .of(context)
+                  .colorScheme
+                  .inversePrimary,
+              title: Text(_getAppBarTitle(readLocations, countries.length)),
+              centerTitle: true,
+              actions: [
+                PopupMenuButton(
+                  onSelected: (value) async {
+                    switch (value) {
+                      case 'filter':
+                        Navigator.push(context,
+                          MaterialPageRoute(
+                              builder: (_) => BookListFilterForm()),
+                        );
+                        break;
+                      case 'add':
+                        Book? savedBook = await Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => BookLookup()),
+                        );
+
+                        if (savedBook != null) {
+                          setState(() {
+                            _savedBooksFuture = _bookService.getSavedBooks();
+                          });
+                        }
+                        break;
                     }
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(value: 'filter', child: Text('Filter')),
-                PopupMenuItem(value: 'add', child: Text('Add Book')),
-              ],
-            ),
-          ]
+                  },
+                  itemBuilder: (context) =>
+                  [
+                    PopupMenuItem(value: 'filter', child: Text('Filter')),
+                    PopupMenuItem(value: 'add', child: Text('Add Book')),
+                  ],
+                ),
+              ]
 
-      ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-          child: FutureBuilder(
-            future: Future.wait([
-              _countryFuture,
-              _savedBooksFuture
-            ]),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final countries = snapshot.data![0] as List<Country>;
-              final books = snapshot.data![1] as List<Book>;
-
-              return SingleChildScrollView(
+          ),
+          body: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0, vertical: 12.0),
+              child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _getGroupedCountryWidgets(countries, books),
+                  children: _getGroupedCountryWidgets(countries, booksByCountry),
                 ),
-              );
-            },
+              )
           ),
-        )
-
+        );
+      }
     );
   }
 
-  String _getAppBarTitle() {
-    return widget.bookListType == BookListType.country ? "Global" : "United States";
+  String _getAppBarTitle(readLocations, totalLocations) {
+    String locationType = widget.bookListType == BookListType.country ? "Global" : "United States";
+    return "$locationType ($readLocations/$totalLocations)";
   }
 
   // List<Widget> _getCountryWidgets() {
@@ -119,8 +136,7 @@ class _BookListState extends State<BookList> {
   //   ),).toList();
   // }
 
-  List<Widget> _getGroupedCountryWidgets(List<Country> countries, List<Book> savedBooks) {
-    final booksByCountry = _groupBooksByCountry(savedBooks);
+  List<Widget> _getGroupedCountryWidgets(List<Country> countries, var booksByCountry) {
 
     // 1. Get unique regions and sort them
     final regions = countries
@@ -128,6 +144,7 @@ class _BookListState extends State<BookList> {
         .toSet()
         .toList()
       ..sort();
+
 
     // 2. Build widgets grouped by region
     return regions.map((region) {
@@ -137,6 +154,15 @@ class _BookListState extends State<BookList> {
           .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
 
+      final totalCountries = regionCountries.length;
+      final readCountries = regionCountries.where((country) {
+        final books = booksByCountry[country.code] ?? [];
+        return books.any((b) => b.readDate != null);
+      }).length;
+
+
+
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -144,7 +170,7 @@ class _BookListState extends State<BookList> {
             padding: const EdgeInsets.symmetric(vertical: 12.0),
             child: ExpansionTile(
               title: Text(
-                region,
+                "$region  ($readCountries / $totalCountries)",
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -153,30 +179,32 @@ class _BookListState extends State<BookList> {
               children: [
                 ...regionCountries.map((country) {
                   final books = booksByCountry[country.code] ?? [];
+                  final hasReadBooks = books.any((b) => b.readDate != null);
 
                   return LocationExpansionTile(
                     title: country.name,
+                    readFrom: hasReadBooks,
                     assetType: country.flagType,
                     assetPath: country.flagType == AssetType.svg
                         ? 'assets/images/country_flags_svg/${country.code}.svg'
                         : 'assets/images/country_flags_png/${country.code}.png',
                     children: books.isEmpty
                         ? [
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "No books yet",
-                          style: TextStyle(fontStyle: FontStyle.italic),
-                        ),
-                      )
-                    ]
-                        : books.map((book) {
-                      return BookTile(
-                        title: book.title,
-                        isRead: book.readDate != null,
-                        onTap: () => goToBookInformation(book),
-                      );
-                    }).toList(),
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              "No books yet",
+                              style: TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                          )
+                        ]
+                        : books.map<BookTile>((book) {
+                          return BookTile(
+                            title: book.title,
+                            isRead: book.readDate != null,
+                            onTap: () => goToBookInformation(book),
+                          );
+                     }).toList(),
                   );
                 }),
               ],

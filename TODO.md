@@ -1,14 +1,8 @@
 # 1. MVP
 
-## A. Country List
-
-- Country List: Show a read icon in country panel if any book has been read 
-- Country List: Show read/total in region panels
-- Country List: Show read/total countries in page header
-
 ## B. State List
 
-- Data: Get state flag images
+[] - Data: Get state flag images
 [] - Data: Create list of states along with their abbreviations and country code
 - Multiple: Add stateCode to book class and example instance
 - State List: State list display which should match country just without region grouping
