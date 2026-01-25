@@ -1,20 +1,11 @@
 # 1. MVP
 
-## B. State List
-
-[] - Data: Get state flag images
-[] - Data: Create list of states along with their abbreviations and country code
-- Multiple: Add stateCode to book class and example instance
-- State List: State list display which should match country just without region grouping
-- State List: Update header when state list to show read/total states
-- Book information: When type is state or book contains stateName country can just show US or be hidden
-- Book information: When type is state or book contains stateCode show states dropdown
-
 ## C. Persistence 
 
 - Database setup 
 - Add countries to database on initial setup
 - Add US states to database on initial setup
+- Update book pages to use real library
 - Add existing book information to database on initial setup
 - Book List: get country and book information from DB
 - Book Information: If db book has image, show, otherwise get from API 

@@ -29,4 +29,5 @@ flutter:
    - assets/images/
    - assets/images/country_flags_svg/
    - assets/images/country_flags_png/
+   - assets/images/state_flags/
 

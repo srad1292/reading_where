@@ -10,6 +10,7 @@ class Book {
 
   String? description;
   String? countryCode;
+  String? stateCode;
   DateTime? readDate;
   int? rating;
 
@@ -22,6 +23,7 @@ class Book {
     this.coverId,
     this.publishYear,
     this.countryCode,
+    this.stateCode,
     this.rating,
     this.readDate,
     this.localId,

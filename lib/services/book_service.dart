@@ -1,20 +1,20 @@
 import 'dart:typed_data';
-import 'package:collection/collection.dart';
 
 import 'package:reading_where/abstract_classes/i_book_service.dart';
 import 'package:reading_where/service_locator.dart';
 
 
+import '../enums/book_list_type.dart';
 import '../models/book.dart';
 import '../models/book_search.dart';
 import '../models/paginated_book.dart';
 import 'open_library_service.dart';
 
 class BookService implements IBookService {
-
   late OpenLibraryService implementedService;
 
   List<Book> savedBooks = [];
+  late BookListType bookListType;
 
   BookService() {
     implementedService = serviceLocator.get<OpenLibraryService>();
@@ -133,7 +133,36 @@ class BookService implements IBookService {
           authorKey: ["OL19767A"],
           authorName: ["Aldous Huxley"],
           countryCode: "ao",
-          readDate: DateTime(2012, 4, 14))
+          readDate: DateTime(2012, 4, 14)
+      ),
+      Book(
+        localId: 6,
+        title: "Silver screen fiend",
+        providerKey: "/works/OL19991330W",
+        publishYear: 2015,
+        coverId: 9566268,
+        coverEditionKey: "OL27171443M",
+        authorKey: ["OL7220992A"],
+        authorName: ["Patton Oswalt"],
+        countryCode: "us",
+        stateCode: "ca",
+        readDate: DateTime(2012, 4, 14),
+        rating: 5
+      ),
+      Book(
+          localId: 7,
+          title: "James",
+          providerKey: "/works/OL36506504W",
+          publishYear: 2024,
+          coverId: 15094964,
+          coverEditionKey: "OL50721432M",
+          authorKey: ["OL7220992A"],
+          authorName: ["Percival L. Everett"],
+          countryCode: "us",
+          stateCode: "mo",
+          readDate: DateTime(2012, 4, 14),
+          rating: 4
+      )
     ];
   }
 

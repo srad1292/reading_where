@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:reading_where/models/CountryState.dart';
 
+import '../enums/book_list_type.dart';
 import '../models/book.dart';
 import '../models/country.dart';
 import '../service_locator.dart';
@@ -20,6 +22,7 @@ class _BookInformationState extends State<BookInformation> {
   final BookService _bookService = serviceLocator.get<BookService>();
 
   late String _countryCode;
+  late String _stateCode;
   DateTime? _readDate;
   int? _rating;
   bool _isRead = false;
@@ -29,7 +32,12 @@ class _BookInformationState extends State<BookInformation> {
   void initState() {
     super.initState();
 
-    _countryCode = widget.book.countryCode ?? "";
+    if (_bookService.bookListType == BookListType.states) {
+      _countryCode = "us";
+    } else {
+      _countryCode = widget.book.countryCode ?? "";
+    }
+    _stateCode = widget.book.stateCode ?? "";
     _readDate = widget.book.readDate;
     _rating = widget.book.rating;
 
@@ -89,7 +97,7 @@ class _BookInformationState extends State<BookInformation> {
                     return DropdownButtonFormField<String>(
                       value: _countryCode.isEmpty ? null : _countryCode,
                       decoration: const InputDecoration(
-                        labelText: "Country Code",
+                        labelText: "Country",
                         border: OutlineInputBorder(),
                       ),
                       items: countries
@@ -100,6 +108,9 @@ class _BookInformationState extends State<BookInformation> {
                           .toList(),
                       onChanged: (value) {
                         _changed = true;
+                        if(value != 'us') {
+                          _stateCode = "";
+                        }
                         setState(() => _countryCode = value ?? "");
                       },
                     );
@@ -107,6 +118,38 @@ class _BookInformationState extends State<BookInformation> {
                   }),
 
               const SizedBox(height: 24),
+
+              if(_countryCode == 'us')
+                FutureBuilder<List<CountryState>>(
+                  future: _bookLocationService.getCountryStateList(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final states = snapshot.data!;
+                    return DropdownButtonFormField<String>(
+                      value: _stateCode.isEmpty ? null : _stateCode,
+                      decoration: const InputDecoration(
+                        labelText: "State",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: states
+                          .map((countryState) => DropdownMenuItem(
+                        value: countryState.code,
+                        child: Text(countryState.name),
+                      ))
+                          .toList(),
+                      onChanged: (value) {
+                        _changed = true;
+                        setState(() => _stateCode = value ?? "");
+                      },
+                    );
+
+                  }),
+
+              if(_countryCode == 'us')
+                const SizedBox(height: 24),
 
               // --- Read Switch ---
               Row(
@@ -198,6 +241,7 @@ class _BookInformationState extends State<BookInformation> {
                     widget.book.rating = null;
                   }
                   widget.book.countryCode = _countryCode;
+                  widget.book.stateCode = _stateCode;
                   Book? result;
                   if(_changed || widget.book.localId == null) {
                     result = await _bookService.saveBook(widget.book);

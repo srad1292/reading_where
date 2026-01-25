@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reading_where/enums/book_list_type.dart';
 import 'package:reading_where/components/book_tile.dart';
+import 'package:reading_where/models/CountryState.dart';
 import 'package:reading_where/pages/book_information.dart';
 import 'package:reading_where/pages/book_list_filter_form.dart';
 import 'package:reading_where/service_locator.dart';
@@ -28,6 +29,7 @@ class _BookListState extends State<BookList> {
   final BookService _bookService = serviceLocator.get<BookService>();
 
   late Future<List<Country>> _countryFuture;
+  late Future<List<CountryState>> _countryStateFuture;
   late Future<List<Book>> _savedBooksFuture;
 
 
@@ -35,7 +37,10 @@ class _BookListState extends State<BookList> {
   void initState() {
     super.initState();
     _countryFuture = _bookLocationService.getCountryList();
+    _countryStateFuture = _bookLocationService.getCountryStateList();
     _savedBooksFuture = _bookService.getSavedBooks();
+    _bookService.bookListType = widget.bookListType;
+
   }
 
   @override
@@ -43,6 +48,7 @@ class _BookListState extends State<BookList> {
     return FutureBuilder(
       future: Future.wait([
         _countryFuture,
+        _countryStateFuture,
         _savedBooksFuture
       ]),
       builder: (context, snapshot) {
@@ -51,13 +57,22 @@ class _BookListState extends State<BookList> {
         }
 
         final countries = snapshot.data![0] as List<Country>;
-        final books = snapshot.data![1] as List<Book>;
+        final countryStates = snapshot.data![1] as List<CountryState>;
+        final books = snapshot.data![2] as List<Book>;
         final booksByCountry = _groupBooksByCountry(books);
+        final booksByState = _groupBooksByState(books);
         int readLocations = 0;
+        int totalLocations = 0;
         if(widget.bookListType == BookListType.country) {
-
+          totalLocations = countries.length;
           readLocations = countries.where((country) {
             final books = booksByCountry[country.code] ?? [];
+            return books.any((b) => b.readDate != null);
+          }).length;
+        } else {
+          totalLocations = countryStates.length;
+          readLocations = countryStates.where((cs) {
+            final books = booksByState[cs.code] ?? [];
             return books.any((b) => b.readDate != null);
           }).length;
         }
@@ -69,7 +84,7 @@ class _BookListState extends State<BookList> {
                   .of(context)
                   .colorScheme
                   .inversePrimary,
-              title: Text(_getAppBarTitle(readLocations, countries.length)),
+              title: Text(_getAppBarTitle(readLocations, totalLocations)),
               centerTitle: true,
               actions: [
                 PopupMenuButton(
@@ -109,7 +124,9 @@ class _BookListState extends State<BookList> {
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _getGroupedCountryWidgets(countries, booksByCountry),
+                  children: widget.bookListType == BookListType.country ?
+                    _getGroupedCountryWidgets(countries, booksByCountry) :
+                    _getStateBookWidgets(countryStates, booksByState)
                 ),
               )
           ),
@@ -123,19 +140,6 @@ class _BookListState extends State<BookList> {
     return "$locationType ($readLocations/$totalLocations)";
   }
 
-  // List<Widget> _getCountryWidgets() {
-  //   return _getCountryList().map((e) => LocationExpansionTile(
-  //       title: e.name,
-  //       assetType: e.flagType,
-  //       assetPath: e.flagType == AssetType.svg ?
-  //         'assets/images/country_flags_svg/${e.code}.svg' :
-  //         'assets/images/country_flags_png/${e.code}.png',
-  //       children: [
-  //         BookTile(title: "Test", isRead: e.name.startsWith("C"))
-  //       ]
-  //   ),).toList();
-  // }
-
   List<Widget> _getGroupedCountryWidgets(List<Country> countries, var booksByCountry) {
 
     // 1. Get unique regions and sort them
@@ -146,9 +150,7 @@ class _BookListState extends State<BookList> {
       ..sort();
 
 
-    // 2. Build widgets grouped by region
     return regions.map((region) {
-      // Countries in this region
       final regionCountries = countries
           .where((c) => c.region == region)
           .toList()
@@ -215,6 +217,37 @@ class _BookListState extends State<BookList> {
     }).toList();
   }
 
+  List<Widget> _getStateBookWidgets(List<CountryState> states, var booksByState) {
+      return states.map((countryState) {
+          final books = booksByState[countryState.code] ?? [];
+          final hasReadBooks = books.any((b) => b.readDate != null);
+
+          return LocationExpansionTile(
+            title: countryState.name,
+            readFrom: hasReadBooks,
+            assetType: AssetType.png,
+            assetPath: 'assets/images/state_flags/${countryState.code}.png',
+            children: books.isEmpty
+                ? [
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  "No books yet",
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              )
+            ]
+                : books.map<BookTile>((book) {
+              return BookTile(
+                title: book.title,
+                isRead: book.readDate != null,
+                onTap: () => goToBookInformation(book),
+              );
+            }).toList(),
+          );
+    }).toList();
+  }
+
   void goToBookInformation(Book book) async {
     Book? savedBook = await Navigator.push(context,
       MaterialPageRoute( builder: (_) => BookInformation(book: book) ),
@@ -235,6 +268,19 @@ class _BookListState extends State<BookList> {
       if((book.countryCode ?? "").isNotEmpty) {
         map.putIfAbsent(book.countryCode!, () => []);
         map[book.countryCode]!.add(book);
+      }
+    }
+
+    return map;
+  }
+
+  Map<String, List<Book>> _groupBooksByState(List<Book> books) {
+    final map = <String, List<Book>>{};
+
+    for (final book in books) {
+      if((book.stateCode ?? "").isNotEmpty) {
+        map.putIfAbsent(book.stateCode!, () => []);
+        map[book.stateCode]!.add(book);
       }
     }
 
