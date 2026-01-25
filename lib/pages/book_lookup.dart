@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:reading_where/components/navigation_tile.dart';
 import 'package:reading_where/models/book.dart';
@@ -21,6 +23,7 @@ class _BookLookupState extends State<BookLookup> {
   final _authorController = TextEditingController();
   final _subjectController = TextEditingController();
   final _bookService = serviceLocator.get<BookService>();
+  final titleLimit = 100;
   final limit = 10;
   int page = 1;
   int pages = 0;
@@ -46,9 +49,9 @@ class _BookLookupState extends State<BookLookup> {
     _subjectController.addListener(_onInputChanged);
 
     // While setting up UI
-    searched = true;
-    collapseForm = true;
-    books = _getSampleBookListForUIWork();
+    // searched = true;
+    // collapseForm = true;
+    // books = _getSampleBookListForUIWork();
   }
 
   void _onInputChanged() {
@@ -106,13 +109,13 @@ class _BookLookupState extends State<BookLookup> {
       children: [
         IconButton(
           onPressed: (page == 1 || searching) ? null : () {
-            _mockPerformSearch(page-1);
+            _performSearch(page-1);
           },
           icon: const Icon(Icons.chevron_left)
         ),
         IconButton(
           onPressed: (page >= pages || searching) ? null : () {
-            _mockPerformSearch(page+1);
+            _performSearch(page+1);
           },
           icon: const Icon(Icons.chevron_right))
       ],
@@ -224,9 +227,12 @@ class _BookLookupState extends State<BookLookup> {
       setState(() {
         books = results.books;
         searched = true;
-        this.page = page;
+        this.page = results.books.isNotEmpty ? page : 1;
+        pages = results.books.isNotEmpty ? (results.total / limit).ceil() : 0;
         collapseForm = results.books.isNotEmpty;
       });
+
+
     } finally {
       setState(() => searching = false);
     }
@@ -257,9 +263,25 @@ class _BookLookupState extends State<BookLookup> {
       itemCount: books.length,
       itemBuilder: (context, index) {
         final book = books[index];
+        int titleEnd = min(titleLimit, book.title.length);
+        String title = book.title.substring(0, titleEnd);
+        if(title.length < book.title.length) {
+          title = "$title...";
+        }
+
+        String subtitle = book.authorName.join(", ");
+        int subtitleEnd = min(titleLimit, subtitle.length);
+        String trimmedSubtitle = subtitle.substring(0, subtitleEnd);
+        if(trimmedSubtitle.length < subtitle.length) {
+          trimmedSubtitle = "$trimmedSubtitle...";
+        }
+
         return NavigationTile(
-          text: book.title,
-          subtitle: Text(book.authorName.join(", ")),
+          text: title,
+          subtitle: Text(
+            trimmedSubtitle,
+            style: Theme.of(context).textTheme.titleMedium
+          ),
           onTap: () => bookInformationNavigation(book),
         );
       },

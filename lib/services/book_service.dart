@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:reading_where/abstract_classes/i_book_service.dart';
+import 'package:reading_where/dao/book_dao.dart';
 import 'package:reading_where/service_locator.dart';
 
 
@@ -12,12 +13,14 @@ import 'open_library_service.dart';
 
 class BookService implements IBookService {
   late OpenLibraryService implementedService;
+  late BookDao bookDao;
 
   List<Book> savedBooks = [];
   late BookListType bookListType;
 
   BookService() {
     implementedService = serviceLocator.get<OpenLibraryService>();
+    bookDao = BookDao();
   }
 
   @override
@@ -35,8 +38,8 @@ class BookService implements IBookService {
     return implementedService.fetchCoverBytes(coverId);
   }
 
-  Future<List<Book>> getSavedBooks() async {
-    return _mockGetSavedBooks();
+  Future<List<Book>> getSavedBooks({String countryCode = '', String stateCode = ''}) async {
+    return bookDao.getAllBooks(countryCode: countryCode, stateCode: stateCode);
   }
 
   Future<Book> saveBook(Book book) async {

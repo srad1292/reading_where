@@ -10,7 +10,7 @@ class NavigationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(text),
+      title: Text(text, style: Theme.of(context).textTheme.titleLarge),
       subtitle: subtitle,
       trailing: const Icon(
         Icons.navigate_next,

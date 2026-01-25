@@ -1,14 +1,8 @@
 # 1. MVP
 
-
-## C. Book Search
-
-[] - Pagination
-
-
 ## D. Persistence 
 
-- Update book pages to use real library
+- Update book information to use real library
 - Add existing book information to database on initial setup
 - Book List: get country and book information from DB
 - Book Information: If db book has image, show, otherwise get from API 

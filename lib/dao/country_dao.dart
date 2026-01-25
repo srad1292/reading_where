@@ -24,7 +24,7 @@ class CountryDao {
       }
       return countries;
     } catch (e) {
-      debugPrint("Error in get all goals");
+      debugPrint("Error in get all countries");
       debugPrint(e.toString());
       return [];
     }
