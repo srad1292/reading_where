@@ -20,6 +20,9 @@ class DatabaseColumn {
   static const String stateCode = "state_code";
   static const String readDate = "read_date";
   static const String rating = "rating";
+  static const String excludeFromCountryList = "exclude_from_country_list";
+  static const String authorGender = "author_gender";
+  static const String category = "category";
 
 
 }

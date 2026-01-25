@@ -2,14 +2,12 @@
 
 ## D. Persistence 
 
-- Update book information to use real library
-- Add existing book information to database on initial setup
-- Book List: get country and book information from DB
-- Book Information: If db book has image, show, otherwise get from API 
-- Book Information: If saving and image not already in db book, save image as well
-- Book Information: Saving should add/update/delete within DB as well
+- Add exclude from country property
+- Save book description
+[] - Update book information to use real library
+[] - Book Information: Saving should add/update/delete within DB as well
 - Import/Export data function
-
+- Export current data to have whenever i reinstall from fresh
 
 # 2. Make it nice
 
@@ -19,13 +17,19 @@
 - Book List: Show authors/date?
 - Book Information: Update rating input to different type
 
-# 3. Book List Filter
-
-- Book List Filter: Create Page
-- Book List: When pop from filter page, use filter to update display
-
-# 4. Analytics
+# 3. Analytics
 
 - Figure out what data I want to track and how I want to display it
 - Author gender
 - Fiction vs nonfiction
+
+# 4. Book List Filter
+
+- Decide if I actually care about this
+- Book List Filter: Create Page
+- Book List: When pop from filter page, use filter to update display
+
+# 5. Things I've decided against but want to keep a note of
+
+- Book Information: If db book has image, show, otherwise get from API
+- Book Information: If saving and image not already in db book, save image as well

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:reading_where/abstract_classes/i_book_service.dart';
 import 'package:reading_where/models/book.dart';
 import 'package:reading_where/models/book_search.dart';
@@ -25,7 +26,7 @@ class OpenLibraryService implements IBookService {
       "page": bookSearch.page.toString(),
       "limit": bookSearch.limit.toString(),
       "language": "eng",
-      "fields": "title,author_name,author_key,cover_i,cover_edition_key,first_publish_year,isbn"
+      "fields": "title,author_name,author_key,cover_i,cover_edition_key,first_publish_year,key"
     };
 
     // Add only non-empty fields
@@ -69,17 +70,25 @@ class OpenLibraryService implements IBookService {
 
   @override
   Future<Book> getBookInformation(Book book) async {
-    final url = "https://openlibrary.org/works/OL45804W.json/${book.providerKey}-M.jpg";
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      OpenItem item = OpenItem.fromJson(json);
-      book.description = item.description;
+    try {
+      final url = "https://openlibrary.org/${book.providerKey}.json";
+      debugPrint("Getting book info using url: $url");
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        OpenItem item = OpenItem.fromJson(json);
+        book.description = item.description;
+        return book;
+      }
+      else {
+        debugPrint("Failed to load book: ${response.statusCode}");
+        return book;
+      }
+    } catch(e) {
+      debugPrint("Get book information threw: ${e.toString()}");
       return book;
     }
-    else {
-      throw Exception("Failed to load image");
-    }
+
   }
 
 

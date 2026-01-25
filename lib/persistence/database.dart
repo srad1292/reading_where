@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 import 'database_column.dart';
 import 'database_table.dart';
 
-const int dbVersion = 1;
+const int dbVersion = 2;
 
 class DBProvider {
   DBProvider._();
@@ -29,6 +29,7 @@ class DBProvider {
       version: dbVersion,
       onOpen: (db) {},
       onCreate: _createCallback,
+      onUpgrade: _upgradeCallback
     );
   }
 
@@ -108,6 +109,17 @@ class DBProvider {
 
     await batch.commit(noResult: true);
   }
+
+  void _upgradeCallback(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.excludeFromCountryList} INTEGER DEFAULT 0");
+      await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.authorGender} TEXT");
+      await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.category} TEXT");
+
+    }
+  }
+
+
 
 
 

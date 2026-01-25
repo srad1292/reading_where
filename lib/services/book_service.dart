@@ -35,7 +35,7 @@ class BookService implements IBookService {
 
   @override
   Future<Uint8List> fetchCoverBytes(int coverId) {
-    return implementedService.fetchCoverBytes(coverId);
+    return coverId == -1 ? Future.value(Uint8List(0)) : implementedService.fetchCoverBytes(coverId);
   }
 
   Future<List<Book>> getSavedBooks({String countryCode = '', String stateCode = ''}) async {
@@ -43,19 +43,11 @@ class BookService implements IBookService {
   }
 
   Future<Book> saveBook(Book book) async {
-    if(savedBooks.isEmpty) {
-      savedBooks = _getMockBookList();
-    }
-    // TODO -> once db is setup set this to localId
-    int existing = savedBooks.indexWhere((e) => e.localId == book.localId);
-    if(existing == -1) {
-      book.localId = savedBooks.length;
-      savedBooks.add(book);
-    } else {
-      savedBooks[existing] = book;
-    }
+    return bookDao.addOrUpdateBook(book);
+  }
 
-    return book;
+  Future<bool> deleteBook(int localId) async {
+    return bookDao.deleteBook(localId: localId);
   }
 
 

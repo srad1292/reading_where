@@ -18,6 +18,9 @@ class Book {
   String? stateCode;
   DateTime? readDate;
   int? rating;
+  bool? excludeFromCountryList;
+  String? authorGender;
+  String? category;
 
   Book({
     required this.title,
@@ -32,7 +35,10 @@ class Book {
     this.rating,
     this.readDate,
     this.localId,
-    this.description
+    this.description,
+    this.excludeFromCountryList,
+    this.authorGender,
+    this.category,
   });
 
   @override
@@ -56,6 +62,10 @@ class Book {
       DatabaseColumn.stateCode: stateCode,
       DatabaseColumn.readDate: readDate?.toIso8601String(),
       DatabaseColumn.rating: rating,
+      DatabaseColumn.excludeFromCountryList: excludeFromCountryList == true ? 1 : 0,
+      DatabaseColumn.authorGender: authorGender,
+      DatabaseColumn.category: category,
+
     };
   }
 
@@ -74,8 +84,12 @@ class Book {
       readDate: map[DatabaseColumn.readDate] != null
           ? DateTime.tryParse(map[DatabaseColumn.readDate])
           : null,
-      rating: map[DatabaseColumn.rating],
+        rating: map[DatabaseColumn.rating],
       localId: map[DatabaseColumn.localId],
+      excludeFromCountryList: (map[DatabaseColumn.excludeFromCountryList] ?? 0) == 1,
+      authorGender: map[DatabaseColumn.authorGender],
+      category: map[DatabaseColumn.category],
+
     );
   }
 

@@ -289,16 +289,16 @@ class _BookLookupState extends State<BookLookup> {
   }
 
   void bookInformationNavigation(Book book) async {
-    Book? savedBook = await Navigator.push(context,
+    bool? savedBook = await Navigator.push(context,
       MaterialPageRoute( builder: (_) => BookInformation(book: book) ),
     );
 
-    if(savedBook != null) {
+    if(savedBook == true) {
       if(!mounted) {
         return;
       }
 
-      Navigator.of(context).pop(savedBook);
+      Navigator.of(context).pop(true);
     }
   }
 

@@ -97,11 +97,11 @@ class _BookListState extends State<BookList> {
                         );
                         break;
                       case 'add':
-                        Book? savedBook = await Navigator.push(context,
+                        bool? savedBook = await Navigator.push(context,
                           MaterialPageRoute(builder: (_) => BookLookup()),
                         );
 
-                        if (savedBook != null) {
+                        if (savedBook == true) {
                           setState(() {
                             _savedBooksFuture = _bookService.getSavedBooks();
                           });
@@ -249,11 +249,11 @@ class _BookListState extends State<BookList> {
   }
 
   void goToBookInformation(Book book) async {
-    Book? savedBook = await Navigator.push(context,
+    bool? savedBook = await Navigator.push(context,
       MaterialPageRoute( builder: (_) => BookInformation(book: book) ),
     );
 
-    if(savedBook != null) {
+    if(savedBook == true) {
       setState(() {
         _savedBooksFuture = _bookService.getSavedBooks();
       });

@@ -9,6 +9,24 @@ import '../persistence/database_table.dart';
 class BookDao {
   BookDao();
 
+  Future<Book> addOrUpdateBook(Book book) async {
+    try {
+      Database db = await (DBProvider.db.database);
+      int insertedId = await db.insert(
+          DatabaseTable.book,
+          book.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace
+      );
+      book.localId = insertedId;
+      return book;
+
+    } on Exception catch (e) {
+      debugPrint("Error adding or replacing book");
+      debugPrint(e.toString());
+      rethrow;
+    }
+  }
+
   Future<List<Book>> getAllBooks({String countryCode = '', String stateCode = ''}) async {
     try {
       Database db = await DBProvider.db.database;
@@ -39,5 +57,27 @@ class BookDao {
       debugPrint(e.toString());
       return [];
     }
+  }
+
+  Future<bool> deleteBook({required int localId}) async {
+    if(localId <= 0) {
+      return true;
+    }
+
+    Database db = await DBProvider.db.database;
+    try {
+      int deletedCount = await db.delete(DatabaseTable.book, where: "${DatabaseColumn.localId} = ?", whereArgs: [localId]);
+
+      if (deletedCount > 0) {
+        debugPrint("Count of deleted books: $deletedCount");
+      }
+
+      return true;
+    } on Exception catch (e) {
+      debugPrint("Error deleting book with id: $localId");
+      debugPrint(e.toString());
+      return false;
+    }
+
   }
 }

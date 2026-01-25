@@ -1,3 +1,6 @@
+import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:reading_where/models/country_state.dart';
 
@@ -27,10 +30,17 @@ class _BookInformationState extends State<BookInformation> {
   int? _rating;
   bool _isRead = false;
   bool _changed = false;
+  bool _showFullDescription = false;
+
+  late Future<Book> _bookInfoFuture;
+  late Future<Uint8List> _bookCoverFuture;
 
   @override
   void initState() {
     super.initState();
+
+    _bookInfoFuture = _bookService.getBookInformation(widget.book);
+    _bookCoverFuture = _bookService.fetchCoverBytes(widget.book.coverId ?? -1);
 
     if (_bookService.bookListType == BookListType.states) {
       _countryCode = "us";
@@ -68,6 +78,21 @@ class _BookInformationState extends State<BookInformation> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Book Information"),
         centerTitle: true,
+        actions: widget.book.localId == null ? null : [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final confirmed = await showDeleteConfirmation(context);
+              if (confirmed) {
+                bool deleted = await deleteBook();
+                if(deleted && mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              }
+            },
+          ),
+        ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
@@ -76,12 +101,17 @@ class _BookInformationState extends State<BookInformation> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // --- Book Title & Author ---
-              Text(widget.book.title,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              Text(widget.book.authorName.join(", "),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-              if (widget.book.publishYear != null)
-                Text("${widget.book.publishYear}"),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  getCoverImage(),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: getBookBasicInfo(),
+                  ),
+                ],
+              ),
+
 
               const SizedBox(height: 24),
 
@@ -250,7 +280,7 @@ class _BookInformationState extends State<BookInformation> {
                     return;
                   }
 
-                  Navigator.of(context).pop(result);
+                  Navigator.of(context).pop(result != null);
 
                 },
                 child: const Text("Save"),
@@ -261,5 +291,117 @@ class _BookInformationState extends State<BookInformation> {
       ),
     );
   }
+
+  Future<bool> showDeleteConfirmation(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // user must choose an option
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Delete Book"),
+          content: const Text("Are you sure you want to delete this book? This action cannot be undone."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                "Delete",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    ) ?? false; // default to false if dialog is dismissed
+  }
+
+  Future<bool> deleteBook() async {
+    return await _bookService.deleteBook(widget.book.localId!);
+  }
+
+
+  Widget getCoverImage() {
+    return FutureBuilder(
+        future: _bookCoverFuture,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if(snapshot.data!.isEmpty) {
+            return Image.asset(
+              "assets/images/no_image.png",
+              width: 44,
+            );
+          }
+
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.memory(
+              snapshot.data!,
+              width: 120,
+              height: 180,
+              fit: BoxFit.cover,
+            ),
+          );
+        }
+    );
+  }
+
+  Widget getBookBasicInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(
+          widget.book.title,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          softWrap: true,
+
+        ),
+        Text(
+          widget.book.authorName.join(", "),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          softWrap: true,
+        ),
+        if (widget.book.publishYear != null)
+          Text("${widget.book.publishYear}"),
+        FutureBuilder(
+          future: _bookInfoFuture,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            String description = snapshot.data?.description ?? "";
+            const maxLength = 180;
+            bool showDescriptionExpansion = description.length > maxLength;
+            String visibleDescription = !showDescriptionExpansion || _showFullDescription ? description : "${description.substring(0, min(maxLength, description.length))}...";
+            return Column(
+              children: [
+                Text(visibleDescription, softWrap: true,),
+                if(showDescriptionExpansion)
+                  GestureDetector(
+                    child: Text(
+                      _showFullDescription ? "Show Less -" : "Show More +",
+                      style: const TextStyle(color: Colors.blue),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _showFullDescription = !_showFullDescription;
+                      });
+                    },
+                  )
+              ]
+            );
+          }
+        ),
+      ],
+    );
+  }
+
 
 }
