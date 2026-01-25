@@ -1,20 +1,21 @@
 # 1. MVP
 
-## C. Persistence 
 
-- Database setup 
-- Add countries to database on initial setup
-- Add US states to database on initial setup
+## C. Book Search
+
+[] - Pagination
+
+
+## D. Persistence 
+
 - Update book pages to use real library
 - Add existing book information to database on initial setup
 - Book List: get country and book information from DB
 - Book Information: If db book has image, show, otherwise get from API 
 - Book Information: If saving and image not already in db book, save image as well
 - Book Information: Saving should add/update/delete within DB as well
+- Import/Export data function
 
-## D. Book Search
-
-- Pagination
 
 # 2. Make it nice
 

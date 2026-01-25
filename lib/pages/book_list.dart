@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reading_where/enums/book_list_type.dart';
 import 'package:reading_where/components/book_tile.dart';
-import 'package:reading_where/models/CountryState.dart';
+import 'package:reading_where/models/country_state.dart';
 import 'package:reading_where/pages/book_information.dart';
 import 'package:reading_where/pages/book_list_filter_form.dart';
 import 'package:reading_where/service_locator.dart';

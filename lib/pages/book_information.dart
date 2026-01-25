@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reading_where/models/CountryState.dart';
+import 'package:reading_where/models/country_state.dart';
 
 import '../enums/book_list_type.dart';
 import '../models/book.dart';

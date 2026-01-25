@@ -23,7 +23,7 @@ class _BookLookupState extends State<BookLookup> {
   final _bookService = serviceLocator.get<BookService>();
   final limit = 10;
   int page = 1;
-  int pages = 3;
+  int pages = 0;
   bool searched = false;
   bool searching = false;
   List<Book> books = [];
@@ -68,6 +68,8 @@ class _BookLookupState extends State<BookLookup> {
 
   @override
   Widget build(BuildContext context) {
+    bool isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () { FocusScope.of(context).unfocus(); },
@@ -84,8 +86,12 @@ class _BookLookupState extends State<BookLookup> {
             children: [
               ...formSectionDisplay(),
 
-              Expanded(child: bookListDisplay()),
 
+              if(isPortrait || collapseForm)
+                Expanded(child: bookListDisplay()),
+
+              if(searched)
+                paginator(),
 
             ],
           ),
@@ -94,8 +100,27 @@ class _BookLookupState extends State<BookLookup> {
     );
   }
 
+  Widget paginator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        IconButton(
+          onPressed: (page == 1 || searching) ? null : () {
+            _mockPerformSearch(page-1);
+          },
+          icon: const Icon(Icons.chevron_left)
+        ),
+        IconButton(
+          onPressed: (page >= pages || searching) ? null : () {
+            _mockPerformSearch(page+1);
+          },
+          icon: const Icon(Icons.chevron_right))
+      ],
+    );
+  }
+
   List<Widget> formSectionDisplay() {
-    return collapseForm ? _collapsedFormDisplay() : _fullFormDisplay();
+    return collapseForm ? _collapsedFormDisplay() : _getFullFormDisplay();
   }
 
   List<Widget> _collapsedFormDisplay() {
@@ -114,6 +139,27 @@ class _BookLookupState extends State<BookLookup> {
         )
       ),
       const SizedBox(height: 16),
+    ];
+  }
+
+  List<Widget> _getFullFormDisplay() {
+    return MediaQuery.of(context).orientation == Orientation.portrait ? _fullFormDisplayPortrait() : _fullFormDisplayLandscape();
+  }
+
+  List<Widget> _fullFormDisplayPortrait() {
+    return _fullFormDisplay();
+  }
+
+  List<Widget> _fullFormDisplayLandscape() {
+    return [
+      Expanded(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _fullFormDisplay(),
+          ),
+        )
+      ),
     ];
   }
 
@@ -203,6 +249,10 @@ class _BookLookupState extends State<BookLookup> {
   }
 
   Widget populatedBookList() {
+    debugPrint("Book List Page: $page");
+    if(books.isNotEmpty) {
+      debugPrint("Book List First: ${books.first.toString()}");
+    }
     return ListView.builder(
       itemCount: books.length,
       itemBuilder: (context, index) {
@@ -210,13 +260,13 @@ class _BookLookupState extends State<BookLookup> {
         return NavigationTile(
           text: book.title,
           subtitle: Text(book.authorName.join(", ")),
-          onTap: () => BookInformationNavigation(book),
+          onTap: () => bookInformationNavigation(book),
         );
       },
     );
   }
 
-  void BookInformationNavigation(Book book) async {
+  void bookInformationNavigation(Book book) async {
     Book? savedBook = await Navigator.push(context,
       MaterialPageRoute( builder: (_) => BookInformation(book: book) ),
     );
@@ -229,7 +279,29 @@ class _BookLookupState extends State<BookLookup> {
       Navigator.of(context).pop(savedBook);
     }
   }
-  
+
+
+  Future<void> _mockPerformSearch(int page) async {
+    FocusScope.of(context).unfocus(); // Close keyboard if open
+    setState(() => searching = true);
+    this.page = page;
+
+    try {
+      List<Book> pageOfBooks = _getSampleBookListForUIWork();
+      if(pageOfBooks.isNotEmpty) {
+        debugPrint(books.first.toString());
+      }
+
+      setState(() {
+        books = pageOfBooks;
+        searched = true;
+        this.page = page;
+        collapseForm = pageOfBooks.isNotEmpty;
+      });
+    } finally {
+      setState(() => searching = false);
+    }
+  }
 
 
   List<Book> _getSampleBookListForUIWork() {
@@ -240,21 +312,21 @@ class _BookLookupState extends State<BookLookup> {
       Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2007,coverId: 13189413,coverEditionKey: "OL37791695M",authorKey: ["OL4983363A"],authorName: ["Don Felder"]),
       Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2020,coverId: 9383131,coverEditionKey: "OL27998067M",authorKey: ["OL7959877A"],authorName: ["Bart D. Ehrman"]),
       Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 1956,coverId: 12628641,coverEditionKey: "OL7281995M",authorKey: ["OL19767A"],authorName: ["Aldous Huxley"]),
-      Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 2021,coverId: null,coverEditionKey: "",authorKey: ["OL9175710A"],authorName: ["Emanuel Swedenborg"]),
-      Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2002,coverId: 732602,coverEditionKey: "OL8556015M",authorKey: ["OL3017083A","OL409922A"],authorName: ["Susan G. Sizemore","Jody Lynn Nye"]),
-      Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 2018,coverId: 11336609,coverEditionKey: "OL32710050M",authorKey: ["OL9175710A"],authorName: ["Emanuel Swedenborg"]),
       Book(title: "The Doors of Perception / Heaven and Hell", providerKey: "/works/OL64442W", publishYear: 1956,coverId: 39648,coverEditionKey: "OL9238585M",authorKey: ["OL19767A"],authorName: ["Aldous Huxley"]),
-      Book(title: "The marriage of Heaven and Hell", providerKey: "/works/OL575441W", publishYear: 1793,coverId: 118161,coverEditionKey: "OL1089176M",authorKey: ["OL41961A"],authorName: ["William Blake"]),
+      Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 2021,coverId: null,coverEditionKey: "",authorKey: ["OL9175710A"],authorName: ["Emanuel Swedenborg"]),
+      Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 2018,coverId: 11336609,coverEditionKey: "OL32710050M",authorKey: ["OL9175710A"],authorName: ["Emanuel Swedenborg"]),
+      Book(title: "Heaven and Hell", providerKey: "/works/OL27183905W", publishYear: 1987,coverId: 4120991,coverEditionKey: "OL2388510M",authorKey: ["OL31209A"],authorName: ["John Jakes"]),
       Book(title: "Heaven and Hell", providerKey: "/works/OL27183905W", publishYear: 1987,coverId: 4120991,coverEditionKey: "OL2388510M",authorKey: ["OL31209A"],authorName: ["John Jakes"]),
       Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2007,coverId: 13189413,coverEditionKey: "OL37791695M",authorKey: ["OL4983363A"],authorName: ["Don Felder"]),
-      Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2020,coverId: 9383131,coverEditionKey: "OL27998067M",authorKey: ["OL7959877A"],authorName: ["Bart D. Ehrman"]),
-      Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 1956,coverId: 12628641,coverEditionKey: "OL7281995M",authorKey: ["OL19767A"],authorName: ["Aldous Huxley"]),
       Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 2021,coverId: null,coverEditionKey: "",authorKey: ["OL9175710A"],authorName: ["Emanuel Swedenborg"]),
       Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2002,coverId: 732602,coverEditionKey: "OL8556015M",authorKey: ["OL3017083A","OL409922A"],authorName: ["Susan G. Sizemore","Jody Lynn Nye"]),
+      Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2020,coverId: 9383131,coverEditionKey: "OL27998067M",authorKey: ["OL7959877A"],authorName: ["Bart D. Ehrman"]),
+      Book(title: "The marriage of Heaven and Hell", providerKey: "/works/OL575441W", publishYear: 1793,coverId: 118161,coverEditionKey: "OL1089176M",authorKey: ["OL41961A"],authorName: ["William Blake"]),
+      Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 1956,coverId: 12628641,coverEditionKey: "OL7281995M",authorKey: ["OL19767A"],authorName: ["Aldous Huxley"]),
+      Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2002,coverId: 732602,coverEditionKey: "OL8556015M",authorKey: ["OL3017083A","OL409922A"],authorName: ["Susan G. Sizemore","Jody Lynn Nye"]),
+      Book(title: "The marriage of Heaven and Hell", providerKey: "/works/OL575441W", publishYear: 1793,coverId: 118161,coverEditionKey: "OL1089176M",authorKey: ["OL41961A"],authorName: ["William Blake"]),
       Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 2018,coverId: 11336609,coverEditionKey: "OL32710050M",authorKey: ["OL9175710A"],authorName: ["Emanuel Swedenborg"]),
       Book(title: "The Doors of Perception / Heaven and Hell", providerKey: "/works/OL64442W", publishYear: 1956,coverId: 39648,coverEditionKey: "OL9238585M",authorKey: ["OL19767A"],authorName: ["Aldous Huxley"]),
-      Book(title: "The marriage of Heaven and Hell", providerKey: "/works/OL575441W", publishYear: 1793,coverId: 118161,coverEditionKey: "OL1089176M",authorKey: ["OL41961A"],authorName: ["William Blake"]),
-      Book(title: "Heaven and Hell", providerKey: "/works/OL27183905W", publishYear: 1987,coverId: 4120991,coverEditionKey: "OL2388510M",authorKey: ["OL31209A"],authorName: ["John Jakes"]),
       Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2007,coverId: 13189413,coverEditionKey: "OL37791695M",authorKey: ["OL4983363A"],authorName: ["Don Felder"]),
       Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2020,coverId: 9383131,coverEditionKey: "OL27998067M",authorKey: ["OL7959877A"],authorName: ["Bart D. Ehrman"]),
       Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 1956,coverId: 12628641,coverEditionKey: "OL7281995M",authorKey: ["OL19767A"],authorName: ["Aldous Huxley"]),
@@ -289,12 +361,14 @@ class _BookLookupState extends State<BookLookup> {
       Book(title: "Heaven and hell",providerKey: "/works/OL27183905W", publishYear: 2002,coverId: 732602,coverEditionKey: "OL8556015M",authorKey: ["OL3017083A","OL409922A"],authorName: ["Susan G. Sizemore","Jody Lynn Nye"]),
       Book(title: "Heaven and Hell",providerKey: "/works/OL27183905W", publishYear: 2018,coverId: 11336609,coverEditionKey: "OL32710050M",authorKey: ["OL9175710A"],authorName: ["Emanuel Swedenborg"]),
     ];
+    pages = (allBooks.length / limit).ceil();
+
     int start = (page-1) * limit;
     if(start >= allBooks.length-1) {
       start = 0;
     }
     int end = start+limit >= allBooks.length ? allBooks.length-1 : start+limit;
-
+    debugPrint("Start: $start -- End: $end");
     return allBooks.sublist(start, end);
   }
 
