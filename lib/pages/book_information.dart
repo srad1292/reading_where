@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../models/book.dart';
+import '../models/country.dart';
+import '../service_locator.dart';
+import '../services/book_location_service.dart';
+import '../services/book_service.dart';
 
 class BookInformation extends StatefulWidget {
   final Book book;
@@ -11,10 +15,15 @@ class BookInformation extends StatefulWidget {
 }
 
 class _BookInformationState extends State<BookInformation> {
+
+  final BookLocationService _bookLocationService = serviceLocator.get<BookLocationService>();
+  final BookService _bookService = serviceLocator.get<BookService>();
+
   late String _countryCode;
   DateTime? _readDate;
   int? _rating;
   bool _isRead = false;
+  bool _changed = false;
 
   @override
   void initState() {
@@ -39,6 +48,7 @@ class _BookInformationState extends State<BookInformation> {
     );
 
     if (picked != null) {
+      _changed = true;
       setState(() => _readDate = picked);
     }
   }
@@ -68,22 +78,33 @@ class _BookInformationState extends State<BookInformation> {
               const SizedBox(height: 24),
 
               // --- Country Code ---
-              DropdownButtonFormField<String>(
-                value: _countryCode.isEmpty ? null : _countryCode,
-                decoration: const InputDecoration(
-                  labelText: "Country Code",
-                  border: OutlineInputBorder(),
-                ),
-                items: _countryList
-                    .map((code) => DropdownMenuItem(
-                  value: code,
-                  child: Text(code),
-                ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() => _countryCode = value ?? "");
-                },
-              ),
+              FutureBuilder<List<Country>>(
+                  future: _bookLocationService.getCountryList(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final countries = snapshot.data!;
+                    return DropdownButtonFormField<String>(
+                      value: _countryCode.isEmpty ? null : _countryCode,
+                      decoration: const InputDecoration(
+                        labelText: "Country Code",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: countries
+                          .map((country) => DropdownMenuItem(
+                            value: country.code,
+                            child: Text(country.name),
+                          ))
+                          .toList(),
+                      onChanged: (value) {
+                        _changed = true;
+                        setState(() => _countryCode = value ?? "");
+                      },
+                    );
+
+                  }),
 
               const SizedBox(height: 24),
 
@@ -97,6 +118,7 @@ class _BookInformationState extends State<BookInformation> {
                     onChanged: (value) {
                       setState(() {
                         _isRead = value;
+                        _changed = true;
                         if (!value) {
                           _readDate = null;
                           _rating = null;
@@ -157,6 +179,7 @@ class _BookInformationState extends State<BookInformation> {
                       divisions: 5,
                       label: "${_rating ?? 0}",
                       onChanged: (value) {
+                        _changed = true;
                         setState(() => _rating = value.toInt());
                       },
                     ),
@@ -166,7 +189,7 @@ class _BookInformationState extends State<BookInformation> {
               const SizedBox(height: 24),
 
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if(_isRead) {
                     widget.book.readDate = _readDate;
                     widget.book.rating = _rating;
@@ -175,6 +198,16 @@ class _BookInformationState extends State<BookInformation> {
                     widget.book.rating = null;
                   }
                   widget.book.countryCode = _countryCode;
+                  Book? result;
+                  if(_changed || widget.book.localId == null) {
+                    result = await _bookService.saveBook(widget.book);
+                  }
+                  if(!mounted) {
+                    return;
+                  }
+
+                  Navigator.of(context).pop(result);
+
                 },
                 child: const Text("Save"),
               ),
@@ -185,7 +218,4 @@ class _BookInformationState extends State<BookInformation> {
     );
   }
 
-  List<String> get _countryList => [
-    "US", "CA", "GB", "FR", "DE", "JP", "IN", "BR", "ZA", "AU",
-  ];
 }

@@ -2,11 +2,6 @@
 
 ## A. Country List
 
-- Multiple: Add isbn and dbId fields to book class and example instances
-- Book Information: Saving should pop with the book as data
-- Book Search: If book information pops with data, pop book search as well
-- Country List: When information/search pops with data, add book to list and update display
-- Country List: Update book tiles to go to information page
 - Country List: Show a read icon in country panel if any book has been read 
 - Country List: Show read/total in region panels
 - Country List: Show read/total countries in page header
@@ -14,7 +9,7 @@
 ## B. State List
 
 - Data: Get state flag images
-- Data: Create list of states along with their abbreviations and country code
+[] - Data: Create list of states along with their abbreviations and country code
 - Multiple: Add stateCode to book class and example instance
 - State List: State list display which should match country just without region grouping
 - State List: Update header when state list to show read/total states
@@ -42,6 +37,7 @@
 - Flag image caching for improved speed on page
 - Flag images: something to help the white parts of flag not being lost to background?
 - Book List: Show authors/date?
+- Book Information: Update rating input to different type
 
 # 3. Book List Filter
 
@@ -51,3 +47,5 @@
 # 4. Analytics
 
 - Figure out what data I want to track and how I want to display it
+- Author gender
+- Fiction vs nonfiction

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 class BookTile extends StatefulWidget {
   final String title;
   final bool isRead;
+  final Function onTap;
 
-  const BookTile({super.key, required this.title, required this.isRead});
+  const BookTile({super.key, required this.title, required this.isRead, required this.onTap});
 
   @override
   State<BookTile> createState() => _BookTileState();
@@ -25,7 +26,7 @@ class _BookTileState extends State<BookTile> {
           Icons.navigate_next,
         ),
         onTap: () {
-          print("Book tile tapped");
+          widget.onTap();
         },
       );
   }
