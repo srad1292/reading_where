@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:reading_where/models/book.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/import_result.dart';
 import '../persistence/database.dart';
 import '../persistence/database_column.dart';
 import '../persistence/database_table.dart';
@@ -26,6 +27,36 @@ class BookDao {
       rethrow;
     }
   }
+
+  Future<ImportResult> insertManyBooks(List<Book> books) async {
+    try {
+      final db = await DBProvider.db.database;
+
+      final batch = db.batch();
+
+      for (final book in books) {
+        batch.insert(
+          DatabaseTable.book,
+          book.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      }
+
+      var results = await batch.commit(noResult: false);
+      int inserted = 0;
+      int skipped = 0;
+      for (final result in results) {
+        if (result is int) { inserted++; }
+        else { skipped++; }
+      }
+      return ImportResult(success: true, inserted: inserted, skipped: skipped);
+    } on Exception catch (e) {
+      debugPrint("Error importing books into db: ${e.toString()}");
+      return ImportResult(success: false, inserted: 0, skipped: 0);
+
+    }
+  }
+
 
   Future<List<Book>> getAllBooks({String countryCode = '', String stateCode = '', bool excludeCountry = false}) async {
     try {

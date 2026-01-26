@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
       ),
-      home: const MyHomePage(),
+      home: MyHomePage(),
     );
   }
 }

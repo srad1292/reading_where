@@ -37,6 +37,7 @@ class DBProvider {
     await db.execute(_getCountrySchema());
     await db.execute(_getCountryStateSchema());
     await db.execute(_getBookSchema());
+    await _versionTwoSQL(db);
 
     await _seedCountries(db);
     await _seedCountryStates(db);
@@ -66,7 +67,7 @@ class DBProvider {
         "${DatabaseColumn.title} TEXT,"
         "${DatabaseColumn.authorKey} TEXT,"          // JSON string
         "${DatabaseColumn.authorName} TEXT,"        // JSON string
-        "${DatabaseColumn.providerKey} TEXT,"
+        "${DatabaseColumn.providerKey} TEXT UNIQUE,"
         "${DatabaseColumn.coverEditionKey} TEXT,"
         "${DatabaseColumn.coverId} INTEGER,"
         "${DatabaseColumn.publishYear} INTEGER,"
@@ -112,15 +113,14 @@ class DBProvider {
 
   void _upgradeCallback(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.excludeFromCountryList} INTEGER DEFAULT 0");
-      await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.authorGender} TEXT");
-      await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.category} TEXT");
+      _versionTwoSQL(db);
     }
   }
 
-
-
-
-
+  Future<void> _versionTwoSQL(Database db) async {
+    await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.excludeFromCountryList} INTEGER DEFAULT 0");
+    await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.authorGender} TEXT");
+    await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.category} TEXT");
+  }
 
 }

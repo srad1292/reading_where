@@ -8,12 +8,16 @@ import 'package:reading_where/service_locator.dart';
 import '../enums/book_list_type.dart';
 import '../models/book.dart';
 import '../models/book_search.dart';
+import '../models/import_result.dart';
 import '../models/paginated_book.dart';
 import 'open_library_service.dart';
 
 class BookService implements IBookService {
   late OpenLibraryService implementedService;
   late BookDao bookDao;
+
+  final genderOptions = ["Male", "Female", "Both"];
+  final categoryOptions = ["Fiction", "NonFiction"];
 
   List<Book> savedBooks = [];
   late BookListType bookListType;
@@ -57,6 +61,12 @@ class BookService implements IBookService {
     return bookDao.deleteBook(localId: localId);
   }
 
+  Future<ImportResult> importBooks(List<Book> books) async {
+    for(int idx=0; idx < books.length; idx++) {
+      books[idx].localId = null;
+    }
+    return bookDao.insertManyBooks(books);
+  }
 
 
   Future<List<Book>> _mockGetSavedBooks() {

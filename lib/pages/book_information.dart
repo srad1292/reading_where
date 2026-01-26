@@ -27,6 +27,8 @@ class _BookInformationState extends State<BookInformation> {
 
   late String _countryCode;
   late String _stateCode;
+  late String _authorGender;
+  late String _category;
   DateTime? _readDate;
   int? _rating;
   bool _isRead = false;
@@ -56,6 +58,8 @@ class _BookInformationState extends State<BookInformation> {
 
     _showStateSelect = _countryCode == "us";
     _stateCode = widget.book.stateCode ?? "";
+    _authorGender = widget.book.authorGender ?? "";
+    _category = widget.book.category ?? "";
     _readDate = widget.book.readDate;
     _rating = widget.book.rating;
     _excludeFromCountryList = widget.book.excludeFromCountryList ?? false;
@@ -197,8 +201,48 @@ class _BookInformationState extends State<BookInformation> {
 
                   }),
 
-              if(_countryCode == 'us')
+              if(_showStateSelect)
                 const SizedBox(height: 24),
+
+              DropdownButtonFormField<String>(
+                value: _authorGender.isEmpty ? null : _authorGender,
+                decoration: const InputDecoration(
+                  labelText: "Author Gender",
+                  border: OutlineInputBorder(),
+                ),
+                items: _bookService.genderOptions.map((gender) => DropdownMenuItem(
+                  value: gender,
+                  child: Text(gender),
+                )).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _authorGender = value ?? "";
+                    _changed = true;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 24),
+
+              DropdownButtonFormField<String>(
+                value: _category.isEmpty ? null : _category,
+                decoration: const InputDecoration(
+                  labelText: "Category",
+                  border: OutlineInputBorder(),
+                ),
+                items: _bookService.categoryOptions.map((category) => DropdownMenuItem(
+                  value: category,
+                  child: Text(category),
+                )).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _category = value ?? "";
+                    _changed = true;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 24),
 
               // --- Read Date Picker ---
               Column(
@@ -282,6 +326,10 @@ class _BookInformationState extends State<BookInformation> {
 
               ElevatedButton(
                 onPressed: () async {
+                  if(!_changed) {
+                    Navigator.of(context).pop(false);
+                  }
+
                   if(_isRead) {
                     widget.book.readDate = _readDate;
                     widget.book.rating = _rating;
@@ -296,6 +344,8 @@ class _BookInformationState extends State<BookInformation> {
                   }
                   widget.book.countryCode = _countryCode;
                   widget.book.stateCode = _stateCode;
+                  widget.book.authorGender = _authorGender;
+                  widget.book.category = _category;
                   Book? result;
                   if(_changed || widget.book.localId == null) {
                     result = await _bookService.saveBook(widget.book);

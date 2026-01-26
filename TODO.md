@@ -1,14 +1,10 @@
 # 1. MVP
 
-## D. Persistence 
+## D. Persistence
 
-[] - Add exclude from country property
-[] - Save book description
-[] - Update book information to use real library
-[] - Book Information: Saving should add/update/delete within DB as well
-[] - Fix json decode for data to handle other language characters
-- Import/Export data function
+- Build current data that I have for reading 
 - Export current data to have whenever i reinstall from fresh
+- App icon
 
 # 2. Make it nice
 
