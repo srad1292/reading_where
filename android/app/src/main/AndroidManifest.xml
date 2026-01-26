@@ -10,7 +10,7 @@
     </queries>
 
     <application
-        android:label="reading_where"
+        android:label="Reading Where"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

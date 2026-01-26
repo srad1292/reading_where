@@ -4,7 +4,6 @@
 
 - Build current data that I have for reading 
 - Export current data to have whenever i reinstall from fresh
-- App icon
 
 # 2. Make it nice
 
