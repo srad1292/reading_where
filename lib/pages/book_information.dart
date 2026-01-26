@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:reading_where/models/country_state.dart';
 
 import '../enums/book_list_type.dart';
@@ -125,11 +126,16 @@ class _BookInformationState extends State<BookInformation> {
                   Expanded(
                     child: getBookBasicInfo(),
                   ),
+
                 ],
               ),
 
-
               const SizedBox(height: 24),
+
+
+              bookDescriptionWidget(),
+
+
 
               // --- Country Code ---
               FutureBuilder<List<Country>>(
@@ -324,40 +330,45 @@ class _BookInformationState extends State<BookInformation> {
 
               const SizedBox(height: 24),
 
-              ElevatedButton(
-                onPressed: () async {
-                  if(!_changed) {
-                    Navigator.of(context).pop(false);
-                  }
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      if(!_changed) {
+                        Navigator.of(context).pop(false);
+                      }
 
-                  if(_isRead) {
-                    widget.book.readDate = _readDate;
-                    widget.book.rating = _rating;
-                    widget.book.excludeFromCountryList = _excludeFromCountryList;
-                  } else {
-                    widget.book.readDate = null;
-                    widget.book.rating = null;
-                    widget.book.excludeFromCountryList = false;
-                  }
-                  if((widget.book.description ?? "").isEmpty) {
-                    widget.book.description = _description;
-                  }
-                  widget.book.countryCode = _countryCode;
-                  widget.book.stateCode = _stateCode;
-                  widget.book.authorGender = _authorGender;
-                  widget.book.category = _category;
-                  Book? result;
-                  if(_changed || widget.book.localId == null) {
-                    result = await _bookService.saveBook(widget.book);
-                  }
-                  if(!mounted) {
-                    return;
-                  }
+                      if(_isRead) {
+                        widget.book.readDate = _readDate;
+                        widget.book.rating = _rating;
+                        widget.book.excludeFromCountryList = _excludeFromCountryList;
+                      } else {
+                        widget.book.readDate = null;
+                        widget.book.rating = null;
+                        widget.book.excludeFromCountryList = false;
+                      }
+                      if((widget.book.description ?? "").isEmpty) {
+                        widget.book.description = _description;
+                      }
+                      widget.book.countryCode = _countryCode;
+                      widget.book.stateCode = _stateCode;
+                      widget.book.authorGender = _authorGender;
+                      widget.book.category = _category;
+                      Book? result;
+                      if(_changed || widget.book.localId == null) {
+                        result = await _bookService.saveBook(widget.book);
+                      }
+                      if(!mounted) {
+                        return;
+                      }
 
-                  Navigator.of(context).pop(result != null);
+                      Navigator.of(context).pop(result != null);
 
-                },
-                child: const Text("Save"),
+                    },
+                    child: const Text("Save"),
+                  ),
+                ],
               ),
             ],
           ),
@@ -443,8 +454,12 @@ class _BookInformationState extends State<BookInformation> {
               return const Center(child: CircularProgressIndicator());
             }
 
+            String authors = snapshot.data?.authorName.join(",") ?? "";
+            const maxLength = 120;
+            String visibleAuthors = authors.length < maxLength ? authors : "${authors.substring(0, min(maxLength, authors.length))}...";
+
             return Text(
-              snapshot.data?.authorName.join(",") ?? "",
+              visibleAuthors,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               softWrap: true,
             );
@@ -454,38 +469,45 @@ class _BookInformationState extends State<BookInformation> {
         if (widget.book.publishYear != null)
           Text("${widget.book.publishYear}"),
 
-        FutureBuilder(
-          future: _bookInfoFuture,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
 
-            String description = snapshot.data?.description ?? "";
-            _description = description;
-            const maxLength = 180;
-            bool showDescriptionExpansion = description.length > maxLength;
-            String visibleDescription = !showDescriptionExpansion || _showFullDescription ? description : "${description.substring(0, min(maxLength, description.length))}...";
-            return Column(
-              children: [
-                Text(visibleDescription, softWrap: true,),
-                if(showDescriptionExpansion)
-                  GestureDetector(
-                    child: Text(
-                      _showFullDescription ? "Show Less -" : "Show More +",
-                      style: const TextStyle(color: Colors.blue),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _showFullDescription = !_showFullDescription;
-                      });
-                    },
-                  )
-              ]
-            );
-          }
-        ),
       ],
+    );
+  }
+
+  Widget bookDescriptionWidget() {
+    return FutureBuilder(
+        future: _bookInfoFuture,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          String description = snapshot.data?.description ?? "";
+          _description = description;
+          const maxLength = 180;
+          bool showDescriptionExpansion = description.length > maxLength;
+          String visibleDescription = !showDescriptionExpansion || _showFullDescription ? description : "${description.substring(0, min(maxLength, description.length))}...";
+          return Padding(
+            padding: EdgeInsets.only(bottom: description.isEmpty ? 1 : 24),
+            child: Column(
+                children: [
+                  Text(visibleDescription, softWrap: true,),
+                  if(showDescriptionExpansion)
+                    GestureDetector(
+                      child: Text(
+                        _showFullDescription ? "Show Less -" : "Show More +",
+                        style: const TextStyle(color: Colors.blue),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _showFullDescription = !_showFullDescription;
+                        });
+                      },
+                    )
+                ]
+            ),
+          );
+        }
     );
   }
 

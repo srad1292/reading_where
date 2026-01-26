@@ -1,17 +1,11 @@
 # 1. MVP
 
-## D. Persistence
-
-- Build current data that I have for reading 
-- Export current data to have whenever i reinstall from fresh
+- Done
 
 # 2. Make it nice
 
-- Font styling, colors, etc
 - Flag image caching for improved speed on page
 - Flag images: something to help the white parts of flag not being lost to background?
-- Book List: Show authors/date?
-- Book Information: Update rating input to different type
 
 # 3. Analytics
 

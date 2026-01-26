@@ -17,7 +17,7 @@ class BookService implements IBookService {
   late BookDao bookDao;
 
   final genderOptions = ["Male", "Female", "Both"];
-  final categoryOptions = ["Fiction", "NonFiction"];
+  final categoryOptions = ["Fiction", "Nonfiction"];
 
   List<Book> savedBooks = [];
   late BookListType bookListType;
