@@ -34,13 +34,20 @@ class BookService implements IBookService {
   }
 
   @override
+  Future<Book> getAuthorNames(Book book) async {
+    return await implementedService.getAuthorNames(book);
+  }
+
+  @override
   Future<Uint8List> fetchCoverBytes(int coverId) {
     return coverId == -1 ? Future.value(Uint8List(0)) : implementedService.fetchCoverBytes(coverId);
   }
 
-  Future<List<Book>> getSavedBooks({String countryCode = '', String stateCode = ''}) async {
-    return bookDao.getAllBooks(countryCode: countryCode, stateCode: stateCode);
+  Future<List<Book>> getSavedBooks({String countryCode = '', String stateCode = '', bool excludeCountry = false}) async {
+    return bookDao.getAllBooks(countryCode: countryCode, stateCode: stateCode, excludeCountry: excludeCountry);
   }
+
+
 
   Future<Book> saveBook(Book book) async {
     return bookDao.addOrUpdateBook(book);

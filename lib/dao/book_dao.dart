@@ -27,7 +27,7 @@ class BookDao {
     }
   }
 
-  Future<List<Book>> getAllBooks({String countryCode = '', String stateCode = ''}) async {
+  Future<List<Book>> getAllBooks({String countryCode = '', String stateCode = '', bool excludeCountry = false}) async {
     try {
       Database db = await DBProvider.db.database;
       final whereClauses = <String>[];
@@ -39,6 +39,10 @@ class BookDao {
       if (stateCode.isNotEmpty) {
         whereClauses.add("${DatabaseColumn.stateCode} = ?");
         whereArgs.add(stateCode);
+      }
+      if (excludeCountry == true) {
+        whereClauses.add("${DatabaseColumn.excludeFromCountryList} = ?");
+        whereArgs.add(0);
       }
       final dbData = await db.query(
         DatabaseTable.book,

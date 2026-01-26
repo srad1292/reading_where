@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:reading_where/models/country_state.dart';
 
@@ -31,9 +32,13 @@ class _BookInformationState extends State<BookInformation> {
   bool _isRead = false;
   bool _changed = false;
   bool _showFullDescription = false;
+  bool _showStateSelect = false;
+  bool? _excludeFromCountryList;
+  String? _description;
 
   late Future<Book> _bookInfoFuture;
   late Future<Uint8List> _bookCoverFuture;
+  late Future<Book> _authorNameFuture;
 
   @override
   void initState() {
@@ -41,15 +46,19 @@ class _BookInformationState extends State<BookInformation> {
 
     _bookInfoFuture = _bookService.getBookInformation(widget.book);
     _bookCoverFuture = _bookService.fetchCoverBytes(widget.book.coverId ?? -1);
+    _authorNameFuture = _bookService.getAuthorNames(widget.book);
 
     if (_bookService.bookListType == BookListType.states) {
       _countryCode = "us";
     } else {
       _countryCode = widget.book.countryCode ?? "";
     }
+
+    _showStateSelect = _countryCode == "us";
     _stateCode = widget.book.stateCode ?? "";
     _readDate = widget.book.readDate;
     _rating = widget.book.rating;
+    _excludeFromCountryList = widget.book.excludeFromCountryList ?? false;
 
     _isRead = _readDate != null; // derive initial state
   }
@@ -67,7 +76,10 @@ class _BookInformationState extends State<BookInformation> {
 
     if (picked != null) {
       _changed = true;
-      setState(() => _readDate = picked);
+      setState(() {
+        _readDate = picked;
+        _isRead = true;
+      });
     }
   }
 
@@ -130,6 +142,7 @@ class _BookInformationState extends State<BookInformation> {
                         labelText: "Country",
                         border: OutlineInputBorder(),
                       ),
+                      menuMaxHeight: 600,
                       items: countries
                           .map((country) => DropdownMenuItem(
                             value: country.code,
@@ -138,10 +151,14 @@ class _BookInformationState extends State<BookInformation> {
                           .toList(),
                       onChanged: (value) {
                         _changed = true;
-                        if(value != 'us') {
-                          _stateCode = "";
-                        }
-                        setState(() => _countryCode = value ?? "");
+
+                        setState(() {
+                          if(value != 'us') {
+                            _stateCode = "";
+                          }
+                          _countryCode = value ?? "";
+                          _showStateSelect = value == "us";
+                        });
                       },
                     );
 
@@ -149,7 +166,7 @@ class _BookInformationState extends State<BookInformation> {
 
               const SizedBox(height: 24),
 
-              if(_countryCode == 'us')
+              if(_showStateSelect)
                 FutureBuilder<List<CountryState>>(
                   future: _bookLocationService.getCountryStateList(),
                   builder: (context, snapshot) {
@@ -171,8 +188,10 @@ class _BookInformationState extends State<BookInformation> {
                       ))
                           .toList(),
                       onChanged: (value) {
-                        _changed = true;
-                        setState(() => _stateCode = value ?? "");
+                        setState(() {
+                          _stateCode = value ?? "";
+                          _changed = true;
+                        });
                       },
                     );
 
@@ -181,61 +200,41 @@ class _BookInformationState extends State<BookInformation> {
               if(_countryCode == 'us')
                 const SizedBox(height: 24),
 
-              // --- Read Switch ---
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // --- Read Date Picker ---
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Read?", style: TextStyle(fontSize: 16)),
-                  Switch(
-                    value: _isRead,
-                    onChanged: (value) {
-                      setState(() {
-                        _isRead = value;
-                        _changed = true;
-                        if (!value) {
-                          _readDate = null;
-                          _rating = null;
-                        }
-                      });
-                    },
+                  const Text("Read Date", style: TextStyle(fontSize: 16)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _readDate == null
+                              ? "No date selected"
+                              : "${_readDate!.year}-${_readDate!.month.toString().padLeft(2, '0')}-${_readDate!.day.toString().padLeft(2, '0')}",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _pickReadDate,
+                        child: const Text("Pick Date"),
+                      ),
+                      if (_readDate != null)
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _readDate = null;
+                              _isRead = false;
+                              _changed = true;
+                            });
+                          },
+                        ),
+                    ],
                   ),
                 ],
               ),
-
-              const SizedBox(height: 12),
-
-              // --- Read Date Picker ---
-              if (_isRead)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Read Date", style: TextStyle(fontSize: 16)),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _readDate == null
-                                ? "No date selected"
-                                : "${_readDate!.year}-${_readDate!.month.toString().padLeft(2, '0')}-${_readDate!.day.toString().padLeft(2, '0')}",
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: _pickReadDate,
-                          child: const Text("Pick Date"),
-                        ),
-                        if (_readDate != null)
-                          IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              setState(() => _readDate = null);
-                            },
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
 
               const SizedBox(height: 24),
 
@@ -259,6 +258,26 @@ class _BookInformationState extends State<BookInformation> {
                   ],
                 ),
 
+              if(_showStateSelect && _isRead)
+                const SizedBox(height: 24),
+
+              if(_showStateSelect)
+                Row(
+                  children: [
+                    Checkbox(
+                        value: _excludeFromCountryList,
+                        onChanged: (value) {
+                          setState(() {
+                            _changed = true;
+                            _excludeFromCountryList = value;
+                          });
+                        }
+                    ),
+                    const Text("Exclude From Country List?")
+                  ],
+                ),
+
+
               const SizedBox(height: 24),
 
               ElevatedButton(
@@ -266,9 +285,14 @@ class _BookInformationState extends State<BookInformation> {
                   if(_isRead) {
                     widget.book.readDate = _readDate;
                     widget.book.rating = _rating;
+                    widget.book.excludeFromCountryList = _excludeFromCountryList;
                   } else {
                     widget.book.readDate = null;
                     widget.book.rating = null;
+                    widget.book.excludeFromCountryList = false;
+                  }
+                  if((widget.book.description ?? "").isEmpty) {
+                    widget.book.description = _description;
                   }
                   widget.book.countryCode = _countryCode;
                   widget.book.stateCode = _stateCode;
@@ -362,13 +386,24 @@ class _BookInformationState extends State<BookInformation> {
           softWrap: true,
 
         ),
-        Text(
-          widget.book.authorName.join(", "),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-          softWrap: true,
+        FutureBuilder(
+          future: _authorNameFuture,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            return Text(
+              snapshot.data?.authorName.join(",") ?? "",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              softWrap: true,
+            );
+          }
+
         ),
         if (widget.book.publishYear != null)
           Text("${widget.book.publishYear}"),
+
         FutureBuilder(
           future: _bookInfoFuture,
           builder: (context, snapshot) {
@@ -377,6 +412,7 @@ class _BookInformationState extends State<BookInformation> {
             }
 
             String description = snapshot.data?.description ?? "";
+            _description = description;
             const maxLength = 180;
             bool showDescriptionExpansion = description.length > maxLength;
             String visibleDescription = !showDescriptionExpansion || _showFullDescription ? description : "${description.substring(0, min(maxLength, description.length))}...";

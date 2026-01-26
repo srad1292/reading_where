@@ -2,10 +2,11 @@
 
 ## D. Persistence 
 
-- Add exclude from country property
-- Save book description
+[] - Add exclude from country property
+[] - Save book description
 [] - Update book information to use real library
 [] - Book Information: Saving should add/update/delete within DB as well
+[] - Fix json decode for data to handle other language characters
 - Import/Export data function
 - Export current data to have whenever i reinstall from fresh
 

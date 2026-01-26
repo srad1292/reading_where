@@ -38,7 +38,7 @@ class _BookListState extends State<BookList> {
     super.initState();
     _countryFuture = _bookLocationService.getCountryList();
     _countryStateFuture = _bookLocationService.getCountryStateList();
-    _savedBooksFuture = _bookService.getSavedBooks();
+    _savedBooksFuture = _bookService.getSavedBooks(excludeCountry: widget.bookListType == BookListType.country);
     _bookService.bookListType = widget.bookListType;
 
   }
@@ -103,7 +103,7 @@ class _BookListState extends State<BookList> {
 
                         if (savedBook == true) {
                           setState(() {
-                            _savedBooksFuture = _bookService.getSavedBooks();
+                            _savedBooksFuture = _bookService.getSavedBooks(excludeCountry: widget.bookListType == BookListType.country);
                           });
                         }
                         break;
@@ -255,7 +255,7 @@ class _BookListState extends State<BookList> {
 
     if(savedBook == true) {
       setState(() {
-        _savedBooksFuture = _bookService.getSavedBooks();
+        _savedBooksFuture = _bookService.getSavedBooks(excludeCountry: widget.bookListType == BookListType.country);
       });
     }
   }

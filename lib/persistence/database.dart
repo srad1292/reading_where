@@ -115,7 +115,6 @@ class DBProvider {
       await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.excludeFromCountryList} INTEGER DEFAULT 0");
       await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.authorGender} TEXT");
       await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.category} TEXT");
-
     }
   }
 

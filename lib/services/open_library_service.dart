@@ -50,10 +50,94 @@ class OpenLibraryService implements IBookService {
       throw Exception("Failed to load books");
     }
 
-    final json = jsonDecode(response.body);
+    final decoded = utf8.decode(response.bodyBytes);
+    debugPrint(decoded);
+    final json = jsonDecode(decoded);
     OpenPagination openPagination = OpenPagination.fromJson(json);
     return openPagination.toPaginatedBook();
   }
+
+  @override
+  Future<Book> getAuthorNames(Book book) async {
+    try {
+      if(book.localId != null) {
+        debugPrint("Already have a description so just use it");
+        return book;
+      }
+
+      final keysToFetch = <String>[];
+      final latinNames = <String>[];
+      for (int i = 0; i < book.authorName.length; i++) {
+        final name = book.authorName[i];
+        if (!isMostlyLatin(name)) {
+          debugPrint("${book.authorName[i]} should be retrieved");
+          keysToFetch.add(book.authorKey[i]);
+        } else {
+          debugPrint("${book.authorName[i]} good to go");
+          latinNames.add(book.authorName[i]);
+        }
+      }
+
+
+      final limitedKeys = keysToFetch.take(3);
+
+      if(limitedKeys.isEmpty) {
+        debugPrint("No need to get any author details");
+        return book;
+      }
+
+      final futures = limitedKeys.map((key) async {
+        final url = "https://openlibrary.org/authors/$key.json";
+        final response = await http.get(Uri.parse(url));
+
+        if (response.statusCode == 200) {
+          final decoded = utf8.decode(response.bodyBytes);
+          final json = jsonDecode(decoded);
+          return json;
+        }
+
+        return null;
+      });
+
+      final results = await Future.wait(futures);
+
+      final englishNames = results
+          .whereType<Map<String, dynamic>>()
+          .map((json) => json['personal_name'] ?? json['name'] ?? (json['alternate_names'] as List?)?.first ?? "")
+          .where((name) => name.isNotEmpty)
+          .cast<String>()
+          .map((e) => normalizeAuthorName(e))
+          .toList();
+
+      englishNames.addAll(latinNames);
+      book.authorName = englishNames;
+      return book;
+    } catch(e, st) {
+      debugPrint("Get author information threw: ${e.toString()}");
+      debugPrint(st.toString());
+      return book;
+    }
+  }
+
+  bool isMostlyLatin(String s) {
+    final latin = RegExp(r'^[\u0000-\u024F\u1E00-\u1EFF\s\.\-\,]+$');
+    return latin.hasMatch(s);
+  }
+
+  String normalizeAuthorName(String name) {
+    final parts = name.split(',');
+
+    // "Last, First"
+    if (parts.length == 2) {
+      final last = parts[0].trim();
+      final first = parts[1].trim();
+      return "$first $last";
+    }
+
+    // Anything else: leave untouched
+    return name.trim();
+  }
+
 
 
   @override
@@ -71,11 +155,16 @@ class OpenLibraryService implements IBookService {
   @override
   Future<Book> getBookInformation(Book book) async {
     try {
+      if((book.description ?? "").isNotEmpty) {
+        debugPrint("Already have a description so just use it");
+        return book;
+      }
       final url = "https://openlibrary.org/${book.providerKey}.json";
       debugPrint("Getting book info using url: $url");
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
+        final decoded = utf8.decode(response.bodyBytes);
+        final json = jsonDecode(decoded);
         OpenItem item = OpenItem.fromJson(json);
         book.description = item.description;
         return book;

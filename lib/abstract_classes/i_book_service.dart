@@ -10,4 +10,6 @@ abstract class IBookService {
   Future<Uint8List> fetchCoverBytes(int coverId);
 
   Future<Book> getBookInformation(Book book);
+
+  Future<Book> getAuthorNames(Book book);
 }

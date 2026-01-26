@@ -6,7 +6,7 @@ import '../utility/decode_helper.dart';
 class Book {
   final String title;
   final List<String> authorKey;
-  final List<String> authorName;
+  List<String> authorName;
   final String providerKey;
   final String? coverEditionKey;
   final int? coverId;
