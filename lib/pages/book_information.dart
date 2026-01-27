@@ -1,9 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:reading_where/models/country_state.dart';
 
 import '../enums/book_list_type.dart';

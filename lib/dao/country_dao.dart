@@ -9,12 +9,22 @@ import '../persistence/database_table.dart';
 class CountryDao {
   CountryDao();
 
-  Future<List<Country>> getAllCountries() async {
+  Future<List<Country>> getAllCountries({bool excludeUnavailable = true}) async {
     try {
       Database db = await DBProvider.db.database;
+
+      final whereClauses = <String>[];
+      final whereArgs = <dynamic>[];
+      if (excludeUnavailable == true) {
+        whereClauses.add("${DatabaseColumn.canBeReadFrom} = ?");
+        whereArgs.add(1);
+      }
+
       List<Map<String, dynamic>> dbData = await db.query(
         DatabaseTable.country,
         orderBy: "${DatabaseColumn.name} ASC",
+        where: whereClauses.isEmpty ? null : whereClauses.join(" AND "),
+        whereArgs: whereClauses.isEmpty ? null : whereArgs,
       );
       List<Country> countries = [];
       if (dbData.isNotEmpty) {
@@ -29,4 +39,26 @@ class CountryDao {
       return [];
     }
   }
+
+  Future<Country> updateCountry(Country country) async {
+    try {
+      Database db = await DBProvider.db.database;
+
+      await db.update(
+        DatabaseTable.country,
+        {
+          DatabaseColumn.canBeReadFrom: country.canBeReadFrom,
+        },
+        where: "${DatabaseColumn.code} = ?",
+        whereArgs: [country.code],
+      );
+
+      return country;
+    } catch (e) {
+      debugPrint("Error in update country");
+      debugPrint(e.toString());
+      rethrow;
+    }
+  }
+
 }

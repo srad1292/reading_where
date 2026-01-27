@@ -14,6 +14,7 @@ import 'package:reading_where/enums/asset_type.dart';
 import 'package:reading_where/pages/book_list.dart';
 import 'package:reading_where/components/location_expansion_tile.dart';
 import 'package:reading_where/components/navigation_tile.dart';
+import 'package:reading_where/pages/country_management.dart';
 import 'package:reading_where/service_locator.dart';
 import 'package:reading_where/services/book_service.dart';
 import 'components/success_dialog.dart';
@@ -64,8 +65,8 @@ class MyHomePage extends StatelessWidget {
               },
               itemBuilder: (context) =>
               [
-                const PopupMenuItem(value: 'Import', child: Text('Import')),
-                const PopupMenuItem(value: 'ExportEmail', child: Text('Export Email')),
+                const PopupMenuItem(value: 'Import', child: Text('Import Books')),
+                const PopupMenuItem(value: 'ExportEmail', child: Text('Export Books')),
               ],
             ),
           ]
@@ -85,6 +86,7 @@ class MyHomePage extends StatelessWidget {
                   children: [
                     NavigationTile(text: "Country List", onTap: () => BookListNavigation(context, BookListType.country),),
                     NavigationTile(text: "Analytics", onTap: () => AnalyticsNavigation(),),
+                    NavigationTile(text: "Country Management", onTap: () => CountryManagementNavigation(context),),
                   ]
               ),
               LocationExpansionTile(
@@ -102,12 +104,19 @@ class MyHomePage extends StatelessWidget {
     );
   }
 
+  void CountryManagementNavigation(BuildContext context) {
+    debugPrint("Going to go to country management");
+    Navigator.push(context,
+      MaterialPageRoute( builder: (_) => const CountryManagement(), ),
+    );
+  }
+
   void AnalyticsNavigation() {
-    print("Analytics Navigation TODO");
+    debugPrint("Analytics Navigation TODO");
   }
 
   void BookListNavigation(BuildContext context, BookListType bookListType) {
-    print("Going to go to book list with type: $bookListType");
+    debugPrint("Going to go to book list with type: $bookListType");
     Navigator.push(context,
       MaterialPageRoute( builder: (_) => BookList(bookListType: bookListType), ),
     );

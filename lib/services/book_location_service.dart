@@ -15,12 +15,16 @@ class BookLocationService {
     countryStateDao = CountryStateDao();
   }
 
-  Future<List<Country>> getCountryList() async {
-    return countryDao.getAllCountries();
+  Future<List<Country>> getCountryList({bool excludeUnavailable = true}) async {
+    return countryDao.getAllCountries(excludeUnavailable: excludeUnavailable);
   }
 
   Future<List<CountryState>> getCountryStateList() async {
     return countryStateDao.getAllCountryStates();
+  }
+
+  Future<Country> updateCountry(Country country) async {
+    return countryDao.updateCountry(country);
   }
 
 
