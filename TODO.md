@@ -10,9 +10,10 @@
 # 3. Analytics
 
 - Figure out what data I want to track and how I want to display it
-- Countries read from (kpi number)
+- [] Countries read from (kpi number)
+- [] Books Read (kpi number)
+- [] Average rating (kpi number)
 - Region completion percentage (horizontal bar)
-- Average rating (kpi number)
 - Average rating by region (horizontal bar)
 - Author gender (horizontal bar)
 - Fiction vs nonfiction (horizontal bar)

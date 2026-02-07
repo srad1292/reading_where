@@ -2,10 +2,12 @@ import 'dart:typed_data';
 
 import 'package:reading_where/abstract_classes/i_book_service.dart';
 import 'package:reading_where/dao/book_dao.dart';
+import 'package:reading_where/enums/book_category.dart';
 import 'package:reading_where/service_locator.dart';
 
 
 import '../enums/book_list_type.dart';
+import '../enums/gender.dart';
 import '../models/book.dart';
 import '../models/book_search.dart';
 import '../models/import_result.dart';
@@ -16,8 +18,8 @@ class BookService implements IBookService {
   late OpenLibraryService implementedService;
   late BookDao bookDao;
 
-  final genderOptions = ["Male", "Female", "Both"];
-  final categoryOptions = ["Fiction", "Nonfiction"];
+  final genderOptions = [Gender.male, Gender.female, Gender.both];
+  final categoryOptions = [BookCategory.fiction, BookCategory.nonFiction];
 
   List<Book> savedBooks = [];
   late BookListType bookListType;
@@ -47,8 +49,8 @@ class BookService implements IBookService {
     return coverId == -1 ? Future.value(Uint8List(0)) : implementedService.fetchCoverBytes(coverId);
   }
 
-  Future<List<Book>> getSavedBooks({String countryCode = '', String stateCode = '', bool excludeCountry = false}) async {
-    return bookDao.getAllBooks(countryCode: countryCode, stateCode: stateCode, excludeCountry: excludeCountry);
+  Future<List<Book>> getSavedBooks({String countryCode = '', String stateCode = '', bool excludeCountry = false, bool excludeUnread = false}) async {
+    return bookDao.getAllBooks(countryCode: countryCode, stateCode: stateCode, excludeCountry: excludeCountry, excludeUnread: excludeUnread);
   }
 
 
