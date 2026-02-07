@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:reading_where/models/country_state.dart';
+import 'package:reading_where/pages/edit_book_information.dart';
 
 import '../enums/book_list_type.dart';
 import '../models/book.dart';
@@ -93,21 +94,7 @@ class _BookInformationState extends State<BookInformation> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Book Information"),
         centerTitle: true,
-        actions: widget.book.localId == null ? null : [
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              final confirmed = await showDeleteConfirmation(context);
-              if (confirmed) {
-                bool deleted = await deleteBook();
-                if(deleted && mounted) {
-                  Navigator.of(context).pop(true);
-                }
-              }
-            },
-          ),
-        ],
-
+        actions: _getBookInformationActions(),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
@@ -335,6 +322,7 @@ class _BookInformationState extends State<BookInformation> {
                     onPressed: () async {
                       if(!_changed) {
                         Navigator.of(context).pop(false);
+                        return;
                       }
 
                       if(_isRead) {
@@ -373,6 +361,42 @@ class _BookInformationState extends State<BookInformation> {
         ),
       ),
     );
+  }
+
+  List<Widget> _getBookInformationActions() {
+    return [
+      PopupMenuButton(
+        onSelected: (value) async {
+          switch (value) {
+            case 'edit':
+              bool? updated = await Navigator.push(context,
+               MaterialPageRoute(
+                   builder: (_) => EditBookInformation(book: widget.book)),
+              );
+              if(updated == true && mounted) {
+                setState(() {
+                  _bookInfoFuture = _bookService.getBookInformation(widget.book);
+                });
+              }
+              break;
+            case 'delete':
+              final confirmed = await showDeleteConfirmation(context);
+              if (confirmed) {
+                bool deleted = await deleteBook();
+                if(deleted && mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              };
+          }
+        },
+        itemBuilder: (context) =>
+        [
+          const PopupMenuItem(value: 'edit', child: Text('Edit')),
+          if(widget.book.localId != null)
+            const PopupMenuItem(value: 'delete', child: Text('Delete')),
+        ],
+      ),
+    ];
   }
 
   Future<bool> showDeleteConfirmation(BuildContext context) async {

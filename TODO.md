@@ -19,9 +19,7 @@
 
 # 4. Improvements after using it for a while
 
-- [] Show year and author in book tile
-- [] Show year in book search
-- Edit form for book to let me add a description if missing from API
+- Done
 
 # 5. Book List Filter
 
