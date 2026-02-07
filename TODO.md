@@ -10,16 +10,26 @@
 # 3. Analytics
 
 - Figure out what data I want to track and how I want to display it
-- Author gender
-- Fiction vs nonfiction
+- Countries read from (kpi number)
+- Region completion percentage (horizontal bar)
+- Average rating (kpi number)
+- Average rating by region (horizontal bar)
+- Author gender (horizontal bar)
+- Fiction vs nonfiction (horizontal bar)
 
-# 4. Book List Filter
+# 4. Improvements after using it for a while
+
+- [] Show year and author in book tile
+- [] Show year in book search
+- Edit form for book to let me add a description if missing from API
+
+# 5. Book List Filter
 
 - Decide if I actually care about this
 - Book List Filter: Create Page
 - Book List: When pop from filter page, use filter to update display
 
-# 5. Things I've decided against but want to keep a note of
+# 6. Things I've decided against but want to keep a note of
 
 - Book Information: If db book has image, show, otherwise get from API
 - Book Information: If saving and image not already in db book, save image as well

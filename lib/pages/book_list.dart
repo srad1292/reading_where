@@ -203,8 +203,7 @@ class _BookListState extends State<BookList> {
                         ]
                         : books.map<BookTile>((book) {
                           return BookTile(
-                            title: book.title,
-                            isRead: book.readDate != null,
+                            book: book,
                             onTap: () => goToBookInformation(book),
                           );
                      }).toList(),
@@ -240,8 +239,7 @@ class _BookListState extends State<BookList> {
             ]
                 : books.map<BookTile>((book) {
               return BookTile(
-                title: book.title,
-                isRead: book.readDate != null,
+                book: book,
                 onTap: () => goToBookInformation(book),
               );
             }).toList(),

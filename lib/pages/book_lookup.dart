@@ -269,6 +269,10 @@ class _BookLookupState extends State<BookLookup> {
           title = "$title...";
         }
 
+        String year = book.publishYear == null ? "" : " (${book.publishYear})";
+
+        title = "$title$year";
+
         String subtitle = book.authorName.join(", ");
         int subtitleEnd = min(titleLimit, subtitle.length);
         String trimmedSubtitle = subtitle.substring(0, subtitleEnd);
