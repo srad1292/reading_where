@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:reading_where/enums/book_list_type.dart';
 
 import '../../enums/book_category.dart';
 import '../../enums/gender.dart';
@@ -38,7 +39,7 @@ class KPILocation {
     placesAvailable = placesAvailable.toSet().toList();
   }
 
-  void addBookToLocation(Book book) {
+  void addBookToLocation(Book book, BookListType locationType) {
     if(book.readDate == null) {
       debugPrint("Found a book with no rating which should not happen");
       return;
@@ -46,11 +47,20 @@ class KPILocation {
 
     booksRead++;
 
-    String countryCode = book.countryCode ?? "";
-    if(countryCode.isNotEmpty) {
-      placesReadFrom.add(countryCode);
-      setListsToDistinct();
+    if(locationType == BookListType.country) {
+      String countryCode = book.countryCode ?? "";
+      if(countryCode.isNotEmpty) {
+        placesReadFrom.add(countryCode);
+        setListsToDistinct();
+      }
+    } else if(locationType == BookListType.states) {
+      String stateCode = book.stateCode ?? "";
+      if(stateCode.isNotEmpty) {
+        placesReadFrom.add(stateCode);
+        setListsToDistinct();
+      }
     }
+
 
     if(book.category == BookCategory.fiction) {
       fictionRead++;

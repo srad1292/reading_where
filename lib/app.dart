@@ -16,6 +16,7 @@ import 'package:reading_where/components/location_expansion_tile.dart';
 import 'package:reading_where/components/navigation_tile.dart';
 import 'package:reading_where/pages/country_analytics.dart';
 import 'package:reading_where/pages/country_management.dart';
+import 'package:reading_where/pages/state_analytics.dart';
 import 'package:reading_where/service_locator.dart';
 import 'package:reading_where/services/book_service.dart';
 import 'components/success_dialog.dart';
@@ -86,7 +87,7 @@ class MyHomePage extends StatelessWidget {
                   assetType: AssetType.png,
                   children: [
                     NavigationTile(text: "Country List", onTap: () => BookListNavigation(context, BookListType.country),),
-                    NavigationTile(text: "Analytics", onTap: () => AnalyticsNavigation(context, BookListType.country),),
+                    NavigationTile(text: "Analytics", onTap: () => CountryAnalyticsNavigation(context),),
                     NavigationTile(text: "Country Management", onTap: () => CountryManagementNavigation(context),),
                   ]
               ),
@@ -95,7 +96,7 @@ class MyHomePage extends StatelessWidget {
                   assetPath: 'assets/images/country_flags_svg/us.svg',
                   children: [
                     NavigationTile(text: "State List", onTap: () => BookListNavigation(context, BookListType.states),),
-                    NavigationTile(text: "Analytics", onTap: () => AnalyticsNavigation(context, BookListType.states),),
+                    NavigationTile(text: "Analytics", onTap: () => StateAnalyticsNavigation(context, "us"),),
                   ]
               ),
             ],
@@ -112,13 +113,18 @@ class MyHomePage extends StatelessWidget {
     );
   }
 
-  void AnalyticsNavigation(BuildContext context, BookListType type) {
-    debugPrint("Analytics Navigation");
-    if(type == BookListType.country) {
-      Navigator.push(context,
-        MaterialPageRoute(builder: (_) => const CountryAnalytics(),),
-      );
-    }
+  void CountryAnalyticsNavigation(BuildContext context) {
+    debugPrint("Country Analytics Navigation");
+    Navigator.push(context,
+      MaterialPageRoute(builder: (_) => const CountryAnalytics(),),
+    );
+  }
+
+  void StateAnalyticsNavigation(BuildContext context, String countryCode) {
+    debugPrint("State Analytics Navigation");
+    Navigator.push(context,
+      MaterialPageRoute(builder: (_) => StateAnalytics(countryCode: countryCode ?? ""),),
+    );
   }
 
   void BookListNavigation(BuildContext context, BookListType bookListType) {

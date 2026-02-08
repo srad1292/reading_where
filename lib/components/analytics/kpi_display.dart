@@ -14,7 +14,7 @@ class KPIDisplay extends StatelessWidget {
     return Container(
       color: Colors.white,
       //width: 200,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 6),
       child: Column(
         children: [
           Text(item.label),

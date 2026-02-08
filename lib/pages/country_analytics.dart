@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:reading_where/enums/book_list_type.dart';
 import 'package:reading_where/models/analytics/kpi_location.dart';
 
 import '../components/analytics/kpi_section.dart';
@@ -77,13 +78,13 @@ class _CountryAnalyticsState extends State<CountryAnalytics> {
                 continue;
               }
 
-              globalKPIs.addBookToLocation(book);
+              globalKPIs.addBookToLocation(book, BookListType.country);
               String countryCode = book.countryCode ?? "";
               if(countryCode.isNotEmpty) {
                 Country? country = countries.firstWhereOrNull((element) => element.code == countryCode);
                 String region = country?.region ?? "";
                 if(region.isNotEmpty && regionAnalytics.containsKey(region)) {
-                  regionAnalytics[region]?.addBookToLocation(book);
+                  regionAnalytics[region]?.addBookToLocation(book, BookListType.country);
                 }
               }
             }
