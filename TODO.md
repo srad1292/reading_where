@@ -11,8 +11,13 @@
 
 - Figure out what data I want to track and how I want to display it
 - [] Countries read from (kpi number)
+- [] Countries pending (kpi number)
 - [] Books Read (kpi number)
 - [] Average rating (kpi number)
+- Region completion percentage (KPI Number)
+- Average rating by region (KPI Number)
+- [] Author gender (KPI Number)
+- [] Fiction vs nonfiction (KPI Number)
 - Region completion percentage (horizontal bar)
 - Average rating by region (horizontal bar)
 - Author gender (horizontal bar)

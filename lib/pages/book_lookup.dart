@@ -282,9 +282,10 @@ class _BookLookupState extends State<BookLookup> {
 
         return NavigationTile(
           text: title,
+          largeTitle: false,
           subtitle: Text(
             trimmedSubtitle,
-            style: Theme.of(context).textTheme.titleMedium
+            style: Theme.of(context).textTheme.titleSmall
           ),
           onTap: () => bookInformationNavigation(book),
         );

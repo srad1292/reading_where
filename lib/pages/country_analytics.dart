@@ -1,17 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:reading_where/components/analytics/kpi_display.dart';
-import 'package:reading_where/enums/book_category.dart';
+import 'package:reading_where/models/analytics/kpi_location.dart';
 
 import '../components/analytics/kpi_section.dart';
-import '../enums/gender.dart';
 import '../models/analytics/kpi_item.dart';
 import '../models/book.dart';
 import '../models/country.dart';
 import '../service_locator.dart';
 import '../services/book_location_service.dart';
 import '../services/book_service.dart';
+import 'package:collection/collection.dart';
 
 class CountryAnalytics extends StatefulWidget {
   const CountryAnalytics({super.key});
@@ -39,7 +38,7 @@ class _CountryAnalyticsState extends State<CountryAnalytics> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Country Analytics"),
+        title: const Text("Global Analytics"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -56,17 +55,21 @@ class _CountryAnalyticsState extends State<CountryAnalytics> {
             List<Country> countries = snapshot.data![0] as List<Country>;
             List<Book> books = snapshot.data![1] as List<Book>;
 
-            List<String> countriesReadFrom = [];
+            Map<String, KPILocation> regionAnalytics = new Map<String,KPILocation>();
+            List<String> regions = countries.map((e) => e.region).toSet().toList()..sort();
+            for(String region in regions) {
+              regionAnalytics.putIfAbsent(region, () => KPILocation(location: region));
+            }
 
-            int maleRead = 0;
-            int femaleRead = 0;
+            for(Country country in countries) {
+              String region = country.region;
+              if(region.isNotEmpty && regionAnalytics.containsKey(region)) {
+                regionAnalytics[region]?.placesAvailable.add(country.code);
+              }
+            }
 
-            int fictionCount = 0;
-            int nonFictionCount = 0;
-
-            int totalRating = 0;
-            int ratedCount = 0;
-            double averageRating = 0;
+            KPILocation globalKPIs = KPILocation(location: "global");
+            globalKPIs.placesAvailable = countries.map((e) => e.code).toList();
 
             for(Book book in books) {
               if(book.readDate == null) {
@@ -74,51 +77,49 @@ class _CountryAnalyticsState extends State<CountryAnalytics> {
                 continue;
               }
 
+              globalKPIs.addBookToLocation(book);
               String countryCode = book.countryCode ?? "";
               if(countryCode.isNotEmpty) {
-                countriesReadFrom.add(countryCode);
-              }
-
-              if(book.category == BookCategory.fiction) {
-                fictionCount++;
-              } else if(book.category == BookCategory.nonFiction) {
-                nonFictionCount++;
-              }
-
-              if(book.authorGender == Gender.male || book.authorGender == Gender.both) {
-                maleRead++;
-              }
-              if(book.authorGender == Gender.female || book.authorGender == Gender.both) {
-                femaleRead++;
-              }
-
-              if(book.rating != null) {
-                int rating = book.rating!;
-                ratedCount++;
-                totalRating += rating;
+                Country? country = countries.firstWhereOrNull((element) => element.code == countryCode);
+                String region = country?.region ?? "";
+                if(region.isNotEmpty && regionAnalytics.containsKey(region)) {
+                  regionAnalytics[region]?.addBookToLocation(book);
+                }
               }
             }
 
-            if(ratedCount > 0) {
-              averageRating = totalRating / ratedCount;
-            }
-
-            countriesReadFrom = countriesReadFrom.toSet().toList();
-
-            List<KPIItem> kpis = [
-              KPIItem(label: "Countries Read", intValue: countriesReadFrom.length),
-              KPIItem(label: "Books Read", intValue: books.length),
-              KPIItem(label: "Average Rating", doubleValue: averageRating)
-            ];
+            const double sectionSpace = 36;
 
             return Column(
               children: [
-                KPISection(items: kpis),
+                KPISection(items: countryLocationSection(globalKPIs)),
+                const SizedBox(height: sectionSpace),
+
+                ...regions.map((region) => [
+                  Text(region, style: TextStyle(fontSize: 24),),
+                  const SizedBox(height: 10),
+                  KPISection(items: countryLocationSection(regionAnalytics[region]!)),
+                  const SizedBox(height: sectionSpace),
+                ]).expand((widgetList) => widgetList),
               ],
             );
+
           }),
       ),
     );
+  }
+
+  List<KPIItem> countryLocationSection(KPILocation location) {
+    return [
+      KPIItem(label: "Countries Read", intValue: location.booksRead == 0 ? null : location.placesReadFrom.length),
+      KPIItem(label: "Countries Pending", intValue: location.placesAvailable.length-location.placesReadFrom.length),
+      KPIItem(label: "Books Read", intValue: location.booksRead),
+      KPIItem(label: "Average Rating", doubleValue: location.getAverageRating()),
+      KPIItem(label: "Men Read", intValue: location.booksRead == 0 ? null : location.menRead),
+      KPIItem(label: "Women Read", intValue: location.booksRead == 0 ? null : location.womenRead),
+      KPIItem(label: "Fiction", intValue: location.booksRead == 0 ? null : location.fictionRead),
+      KPIItem(label: "Nonfiction", intValue: location.booksRead == 0 ? null : location.nonfictionRead),
+    ];
   }
 
 }

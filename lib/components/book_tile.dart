@@ -23,8 +23,8 @@ class _BookTileState extends State<BookTile> {
           Icons.verified,
           color: Colors.green,
         ),
-        title: Text("${widget.book.title}$year", style: Theme.of(context).textTheme.titleLarge),
-        subtitle: widget.book.authorName.isEmpty ? null : Text(widget.book.authorName.join(", "), style: Theme.of(context).textTheme.titleMedium),
+        title: Text("${widget.book.title}$year", style: Theme.of(context).textTheme.titleMedium),
+        subtitle: widget.book.authorName.isEmpty ? null : Text(widget.book.authorName.join(", "), style: Theme.of(context).textTheme.titleSmall),
         trailing: const Icon(
           Icons.navigate_next,
         ),
