@@ -20,7 +20,9 @@
 
 # 4. Improvements after using it for a while
 
-- Done
+- Book tile title should be smaller text
+
+
 
 # 5. Book List Filter
 
