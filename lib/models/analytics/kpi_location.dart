@@ -34,6 +34,16 @@ class KPILocation {
     return null;
   }
 
+  double getCompletionPercentage() {
+    int numberAvailable = placesAvailable.length;
+    int numberRead = placesReadFrom.length;
+    if(numberAvailable > 0) {
+      return numberRead / numberAvailable;
+    }
+
+    return 0.0;
+  }
+
   void setListsToDistinct() {
     placesReadFrom = placesReadFrom.toSet().toList();
     placesAvailable = placesAvailable.toSet().toList();

@@ -15,7 +15,7 @@ class KPISection extends StatelessWidget {
   //     child: Wrap(
   //         spacing: 12,
   //         runSpacing: 12,
-  //         children: items.map((item) => SizedBox(width: 220, child: KPIDisplay(item: item))).toList()
+  //         children: items.map((item) => SizedBox(width: 190, child: KPIDisplay(item: item))).toList()
   //     ),
   //   );
   // }
@@ -30,7 +30,7 @@ class KPISection extends StatelessWidget {
           final double maxWidth = constraints.maxWidth;
 
           // Desired card width
-          const double cardWidth = 220;
+          const double cardWidth = 190;
 
           // If two cards fit with spacing, use 2. Otherwise use 1.
           final bool twoPerRow = maxWidth >= (cardWidth * 2 + 12);

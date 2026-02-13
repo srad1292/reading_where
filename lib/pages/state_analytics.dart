@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:reading_where/models/analytics/kpi_location.dart';
 
 import '../components/analytics/kpi_section.dart';
+import '../components/analytics/progress_display.dart';
 import '../enums/book_list_type.dart';
 import '../models/analytics/kpi_item.dart';
 import '../models/book.dart';
@@ -68,9 +69,15 @@ class _StateAnalyticsState extends State<StateAnalytics> {
                 stateKPIs.addBookToLocation(book, BookListType.states);
               }
 
+              const double sectionSpace = 36;
+              const double subSectionSpace = 10;
 
               return Column(
                 children: [
+                  const SizedBox(height: subSectionSpace),
+                  ProgressDisplay(label: "Progress", percentage: stateKPIs.getCompletionPercentage(),),
+
+                  const SizedBox(height: subSectionSpace),
                   KPISection(items: countryLocationSection(stateKPIs)),
                 ],
               );

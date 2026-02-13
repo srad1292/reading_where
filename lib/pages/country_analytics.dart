@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:reading_where/components/analytics/progress_display.dart';
 import 'package:reading_where/enums/book_list_type.dart';
 import 'package:reading_where/models/analytics/kpi_location.dart';
 
@@ -90,15 +91,24 @@ class _CountryAnalyticsState extends State<CountryAnalytics> {
             }
 
             const double sectionSpace = 36;
+            const double subSectionSpace = 10;
 
             return Column(
               children: [
+                const SizedBox(height: subSectionSpace),
+                ProgressDisplay(label: "Global Progress", percentage: globalKPIs.getCompletionPercentage(),),
+
+                const SizedBox(height: subSectionSpace),
+
+
                 KPISection(items: countryLocationSection(globalKPIs)),
                 const SizedBox(height: sectionSpace),
 
                 ...regions.map((region) => [
-                  Text(region, style: TextStyle(fontSize: 24),),
-                  const SizedBox(height: 10),
+                  Text(region, style: const TextStyle(fontSize: 24),),
+                  //const SizedBox(height: subSectionSpace),
+                  ProgressDisplay(label: "Progress", percentage: regionAnalytics[region]!.getCompletionPercentage(),),
+                  const SizedBox(height: subSectionSpace),
                   KPISection(items: countryLocationSection(regionAnalytics[region]!)),
                   const SizedBox(height: sectionSpace),
                 ]).expand((widgetList) => widgetList),
