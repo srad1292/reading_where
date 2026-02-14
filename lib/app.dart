@@ -14,6 +14,7 @@ import 'package:reading_where/enums/asset_type.dart';
 import 'package:reading_where/pages/book_list.dart';
 import 'package:reading_where/components/location_expansion_tile.dart';
 import 'package:reading_where/components/navigation_tile.dart';
+import 'package:reading_where/pages/book_quotes.dart';
 import 'package:reading_where/pages/country_analytics.dart';
 import 'package:reading_where/pages/country_management.dart';
 import 'package:reading_where/pages/state_analytics.dart';
@@ -88,6 +89,7 @@ class MyHomePage extends StatelessWidget {
                   children: [
                     NavigationTile(text: "Country List", onTap: () => BookListNavigation(context, BookListType.country),),
                     NavigationTile(text: "Analytics", onTap: () => CountryAnalyticsNavigation(context),),
+                    NavigationTile(text: "Quotes", onTap: () => QuotesNavigation(context),),
                     NavigationTile(text: "Country Management", onTap: () => CountryManagementNavigation(context),),
                   ]
               ),
@@ -117,6 +119,13 @@ class MyHomePage extends StatelessWidget {
     debugPrint("Country Analytics Navigation");
     Navigator.push(context,
       MaterialPageRoute(builder: (_) => const CountryAnalytics(),),
+    );
+  }
+
+  void QuotesNavigation(BuildContext context) {
+    debugPrint("Quotes Navigation");
+    Navigator.push(context,
+      MaterialPageRoute(builder: (_) => const BookQuotes(),),
     );
   }
 

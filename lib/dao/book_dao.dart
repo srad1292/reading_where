@@ -98,6 +98,35 @@ class BookDao {
     }
   }
 
+  Future<List<Book>> getBooksWithQuotes() async {
+    try {
+      Database db = await DBProvider.db.database;
+      final whereClauses = <String>[];
+      whereClauses.add("${DatabaseColumn.readDate} is not null");
+      whereClauses.add("${DatabaseColumn.quotes} is not null");
+      whereClauses.add("${DatabaseColumn.quotes} != '[]'");
+
+
+      final dbData = await db.query(
+        DatabaseTable.book,
+        where: whereClauses.isEmpty ? null : whereClauses.join(" AND "),
+        orderBy: "${DatabaseColumn.readDate} ASC"
+      );
+      List<Book> books = [];
+      if (dbData.isNotEmpty) {
+        books = List.generate(dbData.length, (index) {
+          return Book.fromMap(dbData[index]);
+        });
+      }
+      return books;
+    } catch (e) {
+      debugPrint("Error in get books with quotes");
+      debugPrint(e.toString());
+      return [];
+    }
+  }
+
+
   Future<bool> deleteBook({required int localId}) async {
     if(localId <= 0) {
       return true;

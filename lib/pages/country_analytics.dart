@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:reading_where/components/analytics/progress_display.dart';
 import 'package:reading_where/enums/book_list_type.dart';
 import 'package:reading_where/models/analytics/kpi_location.dart';

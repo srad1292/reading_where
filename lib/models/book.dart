@@ -22,6 +22,8 @@ class Book {
   String? authorGender;
   String? category;
 
+  late List<String> quotes;
+
   Book({
     required this.title,
     required this.authorKey,
@@ -39,7 +41,8 @@ class Book {
     this.excludeFromCountryList,
     this.authorGender,
     this.category,
-  });
+    List<String>? initialQuotes,
+  }) : quotes = initialQuotes ?? [];
 
   @override
   String toString() {
@@ -64,6 +67,7 @@ class Book {
       DatabaseColumn.excludeFromCountryList: excludeFromCountryList,
       DatabaseColumn.authorGender: authorGender,
       DatabaseColumn.category: category,
+      DatabaseColumn.quotes: quotes
 
     };
   }
@@ -88,6 +92,10 @@ class Book {
       excludeFromCountryList: map[DatabaseColumn.excludeFromCountryList] as bool?,
       authorGender: map[DatabaseColumn.authorGender],
       category: map[DatabaseColumn.category],
+      initialQuotes: map[DatabaseColumn.quotes] != null
+          ? (map[DatabaseColumn.quotes] as List).cast<String>()
+          : [],
+
 
     );
   }
@@ -111,7 +119,7 @@ class Book {
       DatabaseColumn.excludeFromCountryList: excludeFromCountryList == true ? 1 : 0,
       DatabaseColumn.authorGender: authorGender,
       DatabaseColumn.category: category,
-
+      DatabaseColumn.quotes: jsonEncode(quotes),
     };
   }
 
@@ -135,6 +143,7 @@ class Book {
       excludeFromCountryList: (map[DatabaseColumn.excludeFromCountryList] ?? 0) == 1,
       authorGender: map[DatabaseColumn.authorGender],
       category: map[DatabaseColumn.category],
+      initialQuotes: DecodeHelper.decodeListString(map[DatabaseColumn.quotes] ?? []),
 
     );
   }

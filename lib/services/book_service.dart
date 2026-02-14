@@ -53,6 +53,10 @@ class BookService implements IBookService {
     return bookDao.getAllBooks(countryCode: countryCode, stateCode: stateCode, excludeCountry: excludeCountry, excludeUnread: excludeUnread);
   }
 
+  Future<List<Book>> getBooksWithQuotes() async {
+    return bookDao.getBooksWithQuotes();
+  }
+
 
 
   Future<Book> saveBook(Book book) async {

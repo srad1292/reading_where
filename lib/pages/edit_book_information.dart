@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:reading_where/models/country_state.dart';
 
 import '../enums/book_list_type.dart';
@@ -25,6 +26,7 @@ class _EditBookInformationState extends State<EditBookInformation> {
   final BookService _bookService = serviceLocator.get<BookService>();
 
   final List<TextEditingController> _authorControllers = [];
+  final List<TextEditingController> _quoteControllers = [];
 
   late TextEditingController _descriptionController;
   late String _author;
@@ -35,6 +37,8 @@ class _EditBookInformationState extends State<EditBookInformation> {
   void dispose() {
     _descriptionController.dispose();
     for (var controller in _authorControllers) { controller.dispose();}
+    for (var controller in _quoteControllers) { controller.dispose();}
+
     super.dispose();
   }
 
@@ -50,6 +54,13 @@ class _EditBookInformationState extends State<EditBookInformation> {
         TextEditingController authorController = TextEditingController(text: author);
         authorController.addListener(inputChangeListener);
         _authorControllers.add(authorController);
+      }
+
+    }
+
+    if(widget.book.quotes.isNotEmpty) {
+      for (String quote in widget.book.quotes) {
+        _createQuoteController(quote: quote);
       }
 
     }
@@ -104,49 +115,30 @@ class _EditBookInformationState extends State<EditBookInformation> {
 
                 ..._getAuthorInputs(),
 
+                Text("Quotes"),
+                const SizedBox(height: 10),
+
+                ..._getQuoteInputs(),
+
+                ElevatedButton(
+                  onPressed: () {
+                    _createQuoteController();
+                    setState(() {
+
+                    });
+                  },
+                  child: const Text("Add Quote +"),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Save button
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        if(!_changed) {
-                          Navigator.of(context).pop(false);
-                          return;
-                        }
-
-                        widget.book.description = _descriptionController.text;
-
-                        List<String> updatedAuthors = [];
-                        List<String> updatedAuthorKeys = [];
-
-                        for(int i = 0; i < _authorControllers.length; i++) {
-                          if(_authorControllers[i].text.isNotEmpty) {
-                            updatedAuthors.add(_authorControllers[i].text.trim());
-                            updatedAuthorKeys.add(widget.book.authorKey[i]);
-                          }
-                        }
-
-                        debugPrint("Author name + key before changes");
-                        for(int i = 0; i < widget.book.authorName.length; i++) {
-                          debugPrint("${widget.book.authorName[i]} -- ${widget.book.authorKey[i]}");
-                        }
-
-                        widget.book.authorName = updatedAuthors;
-                        widget.book.authorKey = updatedAuthorKeys;
-
-                        debugPrint("Author name + key after changes");
-                        for(int i = 0; i < widget.book.authorName.length; i++) {
-                          debugPrint("${widget.book.authorName[i]} -- ${widget.book.authorKey[i]}");
-                        }
-
-                        if(_changed && widget.book.localId != null) {
-                          await _bookService.saveBook(widget.book);
-                        }
-                        if(!mounted) {
-                          return;
-                        }
-
-                        Navigator.of(context).pop(true);
+                        await _saveBookPressed();
 
                       },
                       child: const Text("Save"),
@@ -172,6 +164,59 @@ class _EditBookInformationState extends State<EditBookInformation> {
             border: const OutlineInputBorder(),
           ),
         )
+      );
+
+      response.add(const SizedBox(height: 24));
+    }
+
+    return response;
+  }
+
+  void _createQuoteController({String quote = ""}) {
+    TextEditingController quoteController = TextEditingController(text: quote);
+    quoteController.addListener(inputChangeListener);
+    _quoteControllers.add(quoteController);
+  }
+
+  List<Widget> _getQuoteInputs() {
+    List<Widget> response = [];
+    for(int i = 0; i < _quoteControllers.length; i++) {
+      response.add(
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _quoteControllers[i],
+                  decoration: InputDecoration(
+                    labelText: "Quote ${i + 1}",
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                    shape: BoxShape.circle
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      _quoteControllers[i].dispose();
+                      _quoteControllers.removeAt(i);
+                      setState(() {
+                        _changed = true;
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.remove,
+                      color: Colors.red
+                    )
+                  ),
+                ),
+              ),
+            ],
+          )
       );
 
       response.add(const SizedBox(height: 24));
@@ -207,6 +252,58 @@ class _EditBookInformationState extends State<EditBookInformation> {
 
       ],
     );
+  }
+
+  Future _saveBookPressed() async {
+    if(!_changed) {
+      Navigator.of(context).pop(false);
+      return;
+    }
+
+    widget.book.description = _descriptionController.text;
+
+    List<String> updatedAuthors = [];
+    List<String> updatedAuthorKeys = [];
+
+    for(int i = 0; i < _authorControllers.length; i++) {
+      if(_authorControllers[i].text.trim().isNotEmpty) {
+        updatedAuthors.add(_authorControllers[i].text.trim());
+        updatedAuthorKeys.add(widget.book.authorKey[i]);
+      }
+    }
+
+    debugPrint("Author name + key before changes");
+    for(int i = 0; i < widget.book.authorName.length; i++) {
+      debugPrint("${widget.book.authorName[i]} -- ${widget.book.authorKey[i]}");
+    }
+
+    widget.book.authorName = updatedAuthors;
+    widget.book.authorKey = updatedAuthorKeys;
+
+    List<String> quotes = [];
+    for(int i = 0; i < _quoteControllers.length; i++) {
+      if(_quoteControllers[i].text.trim().isNotEmpty) {
+        quotes.add(_quoteControllers[i].text.trim());
+      }
+    }
+
+    widget.book.quotes = quotes;
+
+
+    debugPrint("Author name + key after changes");
+    for(int i = 0; i < widget.book.authorName.length; i++) {
+      debugPrint("${widget.book.authorName[i]} -- ${widget.book.authorKey[i]}");
+    }
+
+    if(_changed && widget.book.localId != null) {
+      await _bookService.saveBook(widget.book);
+    }
+    if(!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pop(true);
+
   }
 
 

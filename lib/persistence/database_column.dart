@@ -23,6 +23,7 @@ class DatabaseColumn {
   static const String excludeFromCountryList = "exclude_from_country_list";
   static const String authorGender = "author_gender";
   static const String category = "category";
+  static const String quotes = "quotes";
 
 
 }

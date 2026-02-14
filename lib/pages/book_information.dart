@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:reading_where/models/country_state.dart';
 import 'package:reading_where/pages/edit_book_information.dart';
 
@@ -120,7 +121,18 @@ class _BookInformationState extends State<BookInformation> {
 
               bookDescriptionWidget(),
 
+              if(widget.book.quotes.isNotEmpty)
+                _quoteDisplay(),
 
+
+              const Text(
+                "Details",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold
+                ),
+              ),
+
+              SizedBox(height: 12),
 
               // --- Country Code ---
               FutureBuilder<List<Country>>(
@@ -532,6 +544,27 @@ class _BookInformationState extends State<BookInformation> {
         }
     );
   }
+
+  Widget _quoteDisplay() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Quotes",
+          style: TextStyle(
+            fontWeight: FontWeight.bold
+          ),
+        ),
+        ...widget.book.quotes.map((e) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: MarkdownBody(data: "\"$e\""),
+        )),
+        SizedBox(height: 24)
+      ],
+    );
+  }
+
+
 
 
 }

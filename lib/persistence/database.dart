@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 import 'database_column.dart';
 import 'database_table.dart';
 
-const int dbVersion = 2;
+const int dbVersion = 3;
 
 class DBProvider {
   DBProvider._();
@@ -75,7 +75,8 @@ class DBProvider {
         "${DatabaseColumn.countryCode} TEXT,"
         "${DatabaseColumn.stateCode} TEXT,"
         "${DatabaseColumn.readDate} TEXT,"          // ISO8601 string
-        "${DatabaseColumn.rating} INTEGER"
+        "${DatabaseColumn.rating} INTEGER,"
+        "${DatabaseColumn.quotes} TEXT"
         ");";
   }
 
@@ -115,12 +116,19 @@ class DBProvider {
     if (oldVersion < 2) {
       _versionTwoSQL(db);
     }
+    if(oldVersion < 3) {
+      _versionThreeSQL(db);
+    }
   }
 
   Future<void> _versionTwoSQL(Database db) async {
     await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.excludeFromCountryList} INTEGER DEFAULT 0");
     await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.authorGender} TEXT");
     await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.category} TEXT");
+  }
+
+  Future<void> _versionThreeSQL(Database db) async {
+    await db.execute( "ALTER TABLE ${DatabaseTable.book} ADD COLUMN ${DatabaseColumn.quotes} TEXT");
   }
 
 }
