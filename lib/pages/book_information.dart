@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:reading_where/models/country_state.dart';
@@ -251,8 +252,8 @@ class _BookInformationState extends State<BookInformation> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Read Date", style: TextStyle(fontSize: 16)),
-                  const SizedBox(height: 8),
+                  const Text("Read Date", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Expanded(
@@ -290,18 +291,27 @@ class _BookInformationState extends State<BookInformation> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Rating", style: TextStyle(fontSize: 16)),
-                    Slider(
-                      value: (_rating ?? 0).toDouble(),
-                      min: 0,
-                      max: 5,
-                      divisions: 5,
-                      label: "${_rating ?? 0}",
-                      onChanged: (value) {
-                        _changed = true;
-                        setState(() => _rating = value.toInt());
-                      },
-                    ),
+                    const Text("Rating", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: _getRatingButtons()
+                          ),
+                        ),
+                        if ((_rating ?? 0) > 0)
+                          IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _rating = null;
+                                _changed = true;
+                              });
+                            },
+                          ),
+
+                      ],
+                    )
                   ],
                 ),
 
@@ -355,6 +365,8 @@ class _BookInformationState extends State<BookInformation> {
                       widget.book.category = _category;
                       Book? result;
                       if(_changed || widget.book.localId == null) {
+                        debugPrint("Saving book");
+                        debugPrint(widget.book.toString());
                         result = await _bookService.saveBook(widget.book);
                       }
                       if(!mounted) {
@@ -373,6 +385,24 @@ class _BookInformationState extends State<BookInformation> {
         ),
       ),
     );
+  }
+
+  List<Widget> _getRatingButtons() {
+    List<Widget> result = [];
+    double iconSize = 36;
+    for(int index = 0; index < 5; index++) {
+      result.add(
+        IconButton(
+          onPressed: () {
+            _changed = true;
+            setState(() => _rating = index+1);
+          },
+          icon: (_rating ?? 0) > index ?
+            Icon(Icons.star, size: iconSize, color: Theme.of(context).colorScheme.primary) :
+            Icon(Icons.star_border, size: iconSize, color: Colors.blueGrey)),
+        );
+    }
+    return result;
   }
 
   List<Widget> _getBookInformationActions() {

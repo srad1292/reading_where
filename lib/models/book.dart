@@ -46,7 +46,7 @@ class Book {
 
   @override
   String toString() {
-    return 'Book{title: $title, authorKey: ${authorKey.join(", ")}, authorName: ${authorName.join(", ")}, coverEditionKey: $coverEditionKey, coverId: $coverId, publishYear: $publishYear}';
+    return 'Book{title: $title, authorKey: ${authorKey.join(", ")}, authorName: ${authorName.join(", ")}, coverEditionKey: $coverEditionKey, coverId: $coverId, publishYear: $publishYear, rating: ${rating ?? 'n/a'} }';
   }
 
   Map<String, dynamic> toJson() {

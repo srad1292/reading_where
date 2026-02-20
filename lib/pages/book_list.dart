@@ -187,6 +187,7 @@ class _BookListState extends State<BookList> {
                   return LocationExpansionTile(
                     title: country.name,
                     readFrom: hasReadBooks,
+                    hasBooks: books.isNotEmpty,
                     assetType: country.flagType,
                     assetPath: country.flagType == AssetType.svg
                         ? 'assets/images/country_flags_svg/${country.code}.svg'
@@ -225,6 +226,7 @@ class _BookListState extends State<BookList> {
           return LocationExpansionTile(
             title: countryState.name,
             readFrom: hasReadBooks,
+            hasBooks: books.isNotEmpty,
             assetType: AssetType.png,
             assetPath: 'assets/images/state_flags/${countryState.code}.png',
             children: books.isEmpty

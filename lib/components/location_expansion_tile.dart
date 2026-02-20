@@ -8,6 +8,7 @@ class LocationExpansionTile extends StatelessWidget {
   final List<Widget> children;
   final AssetType assetType;
   final bool readFrom;
+  final bool hasBooks;
 
   const LocationExpansionTile({
     super.key,
@@ -15,6 +16,7 @@ class LocationExpansionTile extends StatelessWidget {
     required this.assetPath,
     required this.children,
     this.readFrom = false,
+    this.hasBooks = false,
     this.assetType = AssetType.svg,
   });
 
@@ -26,7 +28,9 @@ class LocationExpansionTile extends StatelessWidget {
         leading: _getLeading(),
         title: Row(
           children: [
-            Text(title),
+            Text(title,
+              style: hasBooks ? TextStyle(fontWeight: FontWeight.bold) : null,
+            ),
             if (readFrom)
               ...[
                 const SizedBox(width: 6),
