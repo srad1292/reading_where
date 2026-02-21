@@ -19,10 +19,12 @@
 # 4. Improvements after using it for a while
 
 - [] Update rating selection/display
-- Add ability to add a book that open library doesn't find
-- Add ability to update title
+- [] Add ability to add a book that open library doesn't find
+- [] Add ability to update title
 - [] Something in book list display to show country has options
 - Find a book that is already in my list
+- [] Don't exclude unread books from quote page
+- [] Disable save buttons if title/country not set
 
 # 5. Book List Filter
 

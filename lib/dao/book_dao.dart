@@ -102,7 +102,6 @@ class BookDao {
     try {
       Database db = await DBProvider.db.database;
       final whereClauses = <String>[];
-      whereClauses.add("${DatabaseColumn.readDate} is not null");
       whereClauses.add("${DatabaseColumn.quotes} is not null");
       whereClauses.add("${DatabaseColumn.quotes} != '[]'");
 
@@ -110,7 +109,7 @@ class BookDao {
       final dbData = await db.query(
         DatabaseTable.book,
         where: whereClauses.isEmpty ? null : whereClauses.join(" AND "),
-        orderBy: "${DatabaseColumn.readDate} ASC"
+        orderBy: "${DatabaseColumn.readDate} is null, ${DatabaseColumn.readDate} ASC"
       );
       List<Book> books = [];
       if (dbData.isNotEmpty) {

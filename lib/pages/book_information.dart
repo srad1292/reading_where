@@ -341,7 +341,7 @@ class _BookInformationState extends State<BookInformation> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ElevatedButton(
-                    onPressed: () async {
+                    onPressed: _countryCode.isEmpty ? null : () async {
                       if(!_changed) {
                         Navigator.of(context).pop(false);
                         return;

@@ -61,7 +61,7 @@ class OpenLibraryService implements IBookService {
   Future<Book> getAuthorNames(Book book) async {
     try {
       if(book.localId != null) {
-        debugPrint("Already have a description so just use it");
+        debugPrint("Already have authors so just use it");
         return book;
       }
 
@@ -138,10 +138,9 @@ class OpenLibraryService implements IBookService {
     return name.trim();
   }
 
-
-
   @override
   Future<Uint8List> fetchCoverBytes(int coverId) async {
+
     final url = "https://covers.openlibrary.org/b/id/$coverId-M.jpg";
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -157,6 +156,10 @@ class OpenLibraryService implements IBookService {
     try {
       if((book.description ?? "").isNotEmpty) {
         debugPrint("Already have a description so just use it");
+        return book;
+      }
+      if(book.providerKey.isEmpty) {
+        debugPrint("Locally added book, nothing to search for");
         return book;
       }
       final url = "https://openlibrary.org/${book.providerKey}.json";

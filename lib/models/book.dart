@@ -4,13 +4,13 @@ import '../persistence/database_column.dart';
 import '../utility/decode_helper.dart';
 
 class Book {
-  final String title;
+  String title;
   List<String> authorKey;
   List<String> authorName;
   final String providerKey;
   final String? coverEditionKey;
   final int? coverId;
-  final int? publishYear;
+  int? publishYear;
   int? localId;
 
   String? description;

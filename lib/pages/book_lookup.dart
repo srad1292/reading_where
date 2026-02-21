@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:reading_where/components/navigation_tile.dart';
 import 'package:reading_where/models/book.dart';
 import 'package:reading_where/models/paginated_book.dart';
+import 'package:reading_where/pages/add_custom_book.dart';
 import 'package:reading_where/pages/book_information.dart';
 import 'package:reading_where/service_locator.dart';
 import 'package:reading_where/services/book_service.dart';
@@ -81,6 +82,20 @@ class _BookLookupState extends State<BookLookup> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: const Text("Book Search"),
           centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: () async {
+                Book? customBook = await Navigator.push(context,
+                  MaterialPageRoute(
+                      builder: (_) => AddCustomBook()),
+                );
+                if(customBook != null && mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              },
+              icon: Icon(Icons.add, color: Colors.black,)
+            )
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),

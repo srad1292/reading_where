@@ -28,14 +28,17 @@ class _EditBookInformationState extends State<EditBookInformation> {
   final List<TextEditingController> _authorControllers = [];
   final List<TextEditingController> _quoteControllers = [];
 
-  late TextEditingController _descriptionController;
-  late String _author;
+  late String _title;
+  late TextEditingController _titleController;
   late String _description;
+  late TextEditingController _descriptionController;
   bool _changed = false;
+  int? publishYear;
 
   @override
   void dispose() {
     _descriptionController.dispose();
+    _titleController.dispose();
     for (var controller in _authorControllers) { controller.dispose();}
     for (var controller in _quoteControllers) { controller.dispose();}
 
@@ -46,6 +49,10 @@ class _EditBookInformationState extends State<EditBookInformation> {
   void initState() {
     super.initState();
 
+    _title = widget.book.title ?? "";
+    _titleController = TextEditingController(text: _title);
+    _titleController.addListener(inputChangeListener);
+    publishYear = widget.book.publishYear;
     _description = widget.book.description ?? "";
     _descriptionController = TextEditingController(text: _description);
     _descriptionController.addListener(inputChangeListener);
@@ -96,6 +103,16 @@ class _EditBookInformationState extends State<EditBookInformation> {
                     ),
 
                   ],
+                ),
+
+                const SizedBox(height: 24),
+
+                TextField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: "Title",
+                    border: OutlineInputBorder(),
+                  ),
                 ),
 
 
@@ -246,8 +263,42 @@ class _EditBookInformationState extends State<EditBookInformation> {
           softWrap: true,
         ),
 
-        if (widget.book.publishYear != null)
-          Text("${widget.book.publishYear}"),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Publication Year",
+              style: const TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                    child: Text(publishYear == null ? "Not Selected" : "$publishYear")
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final year = await pickYear(context);
+                    if (year != null) {
+                      setState(() => publishYear = year);
+                    }
+                  },
+                  child: const Text("Pick Year"),
+                ),
+                if(publishYear != null)
+                  IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() {
+                        publishYear = null;
+                      });
+                    },
+                  ),
+              ],
+            ),
+          ],
+        ),
 
 
       ],
@@ -261,6 +312,7 @@ class _EditBookInformationState extends State<EditBookInformation> {
     }
 
     widget.book.description = _descriptionController.text;
+    widget.book.title = _titleController.text;
 
     List<String> updatedAuthors = [];
     List<String> updatedAuthorKeys = [];
@@ -305,6 +357,20 @@ class _EditBookInformationState extends State<EditBookInformation> {
     Navigator.of(context).pop(true);
 
   }
+
+  Future<int?> pickYear(BuildContext context) async {
+    final DateTime? date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1800),
+      lastDate: DateTime(DateTime.now().year+1),
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      initialDatePickerMode: DatePickerMode.year, // ← this is the key
+    );
+
+    return date?.year;
+  }
+
 
 
 
