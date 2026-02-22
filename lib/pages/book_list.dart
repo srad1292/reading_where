@@ -3,7 +3,7 @@ import 'package:reading_where/enums/book_list_type.dart';
 import 'package:reading_where/components/book_tile.dart';
 import 'package:reading_where/models/country_state.dart';
 import 'package:reading_where/pages/book_information.dart';
-import 'package:reading_where/pages/book_list_filter_form.dart';
+import 'package:reading_where/pages/book_list_filter.dart';
 import 'package:reading_where/service_locator.dart';
 import 'package:reading_where/services/book_location_service.dart';
 import 'package:reading_where/services/book_service.dart';
@@ -91,11 +91,13 @@ class _BookListState extends State<BookList> {
                   onSelected: (value) async {
                     switch (value) {
                       case 'filter':
-                        // Navigator.push(context,
-                        //   MaterialPageRoute(
-                        //       builder: (_) => BookListFilterForm()),
-                        // );
-                        debugPrint("Filter not implemented yet");
+                        await Navigator.push(context,
+                          MaterialPageRoute(
+                              builder: (_) => BookListFilter()),
+                        );
+                        setState(() {
+                          _savedBooksFuture = _bookService.getSavedBooks(excludeCountry: widget.bookListType == BookListType.country);
+                        });
                         break;
                       case 'add':
                         bool? savedBook = await Navigator.push(context,
@@ -112,8 +114,8 @@ class _BookListState extends State<BookList> {
                   },
                   itemBuilder: (context) =>
                   [
-                    PopupMenuItem(value: 'filter', child: Text('Filter')),
                     PopupMenuItem(value: 'add', child: Text('Add Book')),
+                    PopupMenuItem(value: 'filter', child: Text('Filter Books')),
                   ],
                 ),
               ]

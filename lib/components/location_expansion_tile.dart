@@ -28,8 +28,13 @@ class LocationExpansionTile extends StatelessWidget {
         leading: _getLeading(),
         title: Row(
           children: [
-            Text(title,
-              style: hasBooks ? TextStyle(fontWeight: FontWeight.bold) : null,
+            Expanded(
+              child: Text(
+                title,
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                style: hasBooks ? const TextStyle(fontWeight: FontWeight.bold) : null,
+              ),
             ),
             if (readFrom)
               ...[

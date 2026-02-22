@@ -49,8 +49,8 @@ class BookService implements IBookService {
     return coverId == -1 ? Future.value(Uint8List(0)) : implementedService.fetchCoverBytes(coverId);
   }
 
-  Future<List<Book>> getSavedBooks({String countryCode = '', String stateCode = '', bool excludeCountry = false, bool excludeUnread = false}) async {
-    return bookDao.getAllBooks(countryCode: countryCode, stateCode: stateCode, excludeCountry: excludeCountry, excludeUnread: excludeUnread);
+  Future<List<Book>> getSavedBooks({String countryCode = '', String stateCode = '', bool excludeCountry = false, bool excludeUnread = false, bool sortByName=false}) async {
+    return bookDao.getAllBooks(countryCode: countryCode, stateCode: stateCode, excludeCountry: excludeCountry, excludeUnread: excludeUnread, sortByName: sortByName);
   }
 
   Future<List<Book>> getBooksWithQuotes() async {
